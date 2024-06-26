@@ -115,4 +115,32 @@ func main() { //main function is the entry point of the go code
 	fmt.Println(namesArray)
 
 	fmt.Println(sort.SearchStrings(namesArray, "babar"))
+
+	//loops
+	x := 0
+	//similar to while loop
+	for x < 5 {
+		fmt.Println("value of x is ", x+1)
+		x++
+	}
+
+	//traditional for loop
+	for i := 0; i < 5; i++ {
+		fmt.Println("value of i is ", i)
+	}
+
+	for i := 0; i < len(namesArray); i++ {
+		fmt.Println(namesArray[i])
+	}
+
+	for index, value := range namesArray {
+		fmt.Printf("value at index %v is %v\n", index, value)
+	}
+
+	for _, value := range namesArray { //here _ defines the index (which is neither declares not used)
+		fmt.Printf("value is %v\n", value)
+		value = "new string" ///kind of local copy but it doesn't effect the original slice
+	}
+
+	fmt.Println(namesArray)
 }
