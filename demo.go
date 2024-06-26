@@ -1,6 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"sort"
+	"strings"
+)
 
 // fmt is used for IO operations
 
@@ -90,4 +94,25 @@ func main() { //main function is the entry point of the go code
 	fmt.Println(range1)
 	fmt.Println(range2)
 	fmt.Println(range3)
+
+	greetings := "hello there"
+	fmt.Println(strings.ReplaceAll(greetings, "hello", "hi"))
+	fmt.Println(strings.ToUpper(greetings))
+	fmt.Println(strings.Index(greetings, "th"))
+	fmt.Println(strings.Split(greetings, " "))
+
+	fmt.Println("original string ", greetings)
+
+	ageArray := []int{88, 67, 22, 40, 90, 10, 45, 67}
+	sort.Ints(ageArray) // sort the slice of integers
+	fmt.Println(ageArray)
+
+	index := sort.SearchInts(ageArray, 40) //first sort the array and then search the element
+	fmt.Println(index)
+
+	namesArray := []string{"babar", "mahrukh", "malaika", "ali"}
+	sort.Strings(namesArray) //sort the strings slice
+	fmt.Println(namesArray)
+
+	fmt.Println(sort.SearchStrings(namesArray, "babar"))
 }
