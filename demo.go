@@ -67,4 +67,27 @@ func main() { //main function is the entry point of the go code
 	//Sprintf (save formatted strings)
 	var str = fmt.Sprintf("my age is %v and my name is %v\n", age1, myName)
 	fmt.Println("saved string is:", str)
+
+	//arrays and slices
+	var ages [3]int = [3]int{24, 27, 49} //arrays of fixed size
+	names := [4]string{"Mahrukh", "Ali", "Malaika", "Kalsoom"}
+	// var ages1 = [3]int{24, 27, 49}
+	fmt.Println(ages, len(ages))
+	fmt.Println(names, len(names))
+
+	//slices (use arrays under the hood)
+	var scores = []int{100, 50, 60} ///we can change the size of the array s we didn't define the size
+	scores[2] = 99
+	scores = append(scores, 85)
+	fmt.Println(scores)
+
+	//slice range
+	range1 := names[1:3] //starting from position: to that position -1
+	range2 := names[2:]
+	range3 := names[:3]
+
+	range1 = append(range1, "Ameen")
+	fmt.Println(range1)
+	fmt.Println(range2)
+	fmt.Println(range3)
 }
