@@ -45,4 +45,26 @@ func main() { //main function is the entry point of the go code
 	var score2 float64 = 7837978970920909.7
 	score3 := 9090.99 //by efault it take float64 datatype
 	fmt.Println(score1, score2, score3)
+
+	//Printing and Formatting
+
+	//Print
+	fmt.Print("Hello, ")
+	fmt.Print("world\n")
+
+	//println
+	fmt.Println("Hello, ")
+	fmt.Println("world")
+	fmt.Println("My name is", myName, "and my age is", age1)
+
+	//formatted String (printf) -> %_ = format specifier
+	fmt.Printf("my age is %v and my name is %s\n", age1, myName)
+	fmt.Printf("my age is %q and my name is name is %q\n", age2, myName)
+	fmt.Printf("age is of type %T\n", age1)
+	fmt.Printf("you scored %f points! \n", 255.5)
+	fmt.Printf("you scored %0.1f points! \n", 255.5)
+
+	//Sprintf (save formatted strings)
+	var str = fmt.Sprintf("my age is %v and my name is %v\n", age1, myName)
+	fmt.Println("saved string is:", str)
 }
