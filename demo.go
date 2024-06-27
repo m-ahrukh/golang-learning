@@ -20,7 +20,8 @@ func main() { //main function is the entry point of the go code
 	// booleansAndConditionals()
 	// functions()
 	// functionsReturningMultipleValues()
-	packageScope()
+	// packageScope()
+	maps()
 }
 
 func learnVariables() {
@@ -235,6 +236,34 @@ func packageScope() {
 	}
 	fmt.Println()
 	showScroe()
+}
+
+func maps() {
+	menu := map[string]float64{ //map [key]value pair
+		"soup":           4.99,
+		"pie":            7.99,
+		"salad":          6.99,
+		"toffee pudding": 3.55,
+	}
+	fmt.Println(menu)
+	fmt.Println(menu["pie"])
+	//looping maps
+	for k, v := range menu {
+		fmt.Println(k, "-", v)
+	}
+
+	//int as key type
+	phonebook := map[int]string{
+		0322214567: "Person X",
+		8980980808: "Person Y",
+		5766775979: "Person Z",
+	}
+	fmt.Println(phonebook)
+	fmt.Println(phonebook[1])
+	phonebook[8980980808] = "Person A"
+	for k, v := range phonebook {
+		fmt.Println(k, "-", v)
+	}
 }
 
 func sayGreetings(name string) {
