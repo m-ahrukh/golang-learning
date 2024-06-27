@@ -18,8 +18,8 @@ func main() { //main function is the entry point of the go code
 	// standardLibraryFunctions()
 	// loops()
 	// booleansAndConditionals()
-	functions()
-
+	// functions()
+	functionsReturningMultipleValues()
 }
 
 func learnVariables() {
@@ -217,6 +217,14 @@ func functions() {
 	fmt.Printf("circle2 raduis is %0.3f\n", a2)
 }
 
+func functionsReturningMultipleValues() {
+	firstName, secondName := getInitials("Mahrukh Ameen")
+	fmt.Println(firstName, secondName)
+
+	firstName1, secondName1 := getInitials("Mahrukh")
+	fmt.Println(firstName1, secondName1)
+}
+
 func sayGreetings(name string) {
 	fmt.Println("hello", name)
 }
@@ -233,4 +241,17 @@ func cycleNames(names []string, fun func(string)) { //we can call functin inside
 
 func circleArea(radius float64) float64 { //2nd float64 is the return type of the function
 	return math.Pi * radius * radius
+}
+
+func getInitials(name string) (string, string) {
+	s := strings.ToUpper(name)
+	names := strings.Split(s, " ")
+	var initials []string
+	for _, value := range names {
+		initials = append(initials, value[:1])
+	}
+	if len(initials) > 1 {
+		return initials[0], initials[1]
+	}
+	return initials[0], "_"
 }
