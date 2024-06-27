@@ -1,13 +1,13 @@
 package main
 
 import (
-	"fmt"
+	"fmt" // fmt is used for IO operations
 	"math"
 	"sort"
 	"strings"
 )
 
-// fmt is used for IO operations
+var score = 99.5 //if we define this in our main function and then access this in greeting file, it will give error that score is undefined. this happened because its scope is changed
 
 func main() { //main function is the entry point of the go code
 	// fmt.Println("Hello World")
@@ -19,7 +19,8 @@ func main() { //main function is the entry point of the go code
 	// loops()
 	// booleansAndConditionals()
 	// functions()
-	functionsReturningMultipleValues()
+	// functionsReturningMultipleValues()
+	packageScope()
 }
 
 func learnVariables() {
@@ -223,6 +224,17 @@ func functionsReturningMultipleValues() {
 
 	firstName1, secondName1 := getInitials("Mahrukh")
 	fmt.Println(firstName1, secondName1)
+}
+
+func packageScope() {
+	//for package scope, we have to run both files simultaneously like "go run file1.go file2.go"
+	//if we did.nt do that, it didnt recognize the variables of the other file package scope
+	sayHello("Mahrukh")
+	for _, value := range points {
+		fmt.Print(value, " ")
+	}
+	fmt.Println()
+	showScroe()
 }
 
 func sayGreetings(name string) {
