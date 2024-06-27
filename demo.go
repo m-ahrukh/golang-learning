@@ -21,7 +21,8 @@ func main() { //main function is the entry point of the go code
 	// functions()
 	// functionsReturningMultipleValues()
 	// packageScope()
-	maps()
+	// maps()
+	passByValue()
 }
 
 func learnVariables() {
@@ -266,6 +267,38 @@ func maps() {
 	}
 }
 
+func passByValue() {
+	//makes copy of value hen passed in functions
+	//variables splits in to 2 groups
+	//Group A -> string, int, float, boolean, array, structs
+	//Group B -> slices, maps, functions
+
+	//Group A types -> string, int, float, boolean, array, structs
+	name := "Mahrukh Ameen"
+	updateName(name) //variable passed to a function, go creates copy of the variable
+	//so this is a copy of the variable not the actual variable.
+	//inside the function we are just updating the cpy of the variable not the actual one.
+	fmt.Println(name) // prints Mahrukh Ameen
+
+	//if we want to update the original value by passing it in a funtion,
+	//we should have to return that value in the function in group A.
+	name = updateNameFun(name)
+	fmt.Println(name)
+
+	//Group B Types -> slices, maps, functions
+	menu := map[string]float64{
+		"soup":           4.99,
+		"pie":            7.99,
+		"salad":          6.99,
+		"toffee pudding": 3.55,
+	}
+
+	updateMenu(menu) //it updates the original variable menu
+	//if we update the value by passing value to the funtion of group B,
+	//it updates the original value
+	fmt.Println(menu)
+}
+
 func sayGreetings(name string) {
 	fmt.Println("hello", name)
 }
@@ -295,4 +328,17 @@ func getInitials(name string) (string, string) {
 		return initials[0], initials[1]
 	}
 	return initials[0], "_"
+}
+
+func updateName(name string) {
+	name = "Mahrukh Babar"
+}
+
+func updateNameFun(name string) string {
+	name = "Mahrukh Babar"
+	return name
+}
+
+func updateMenu(y map[string]float64) {
+	y["coffee"] = 2.99
 }
