@@ -22,7 +22,8 @@ func main() { //main function is the entry point of the go code
 	// functionsReturningMultipleValues()
 	// packageScope()
 	// maps()
-	passByValue()
+	// passByValue()
+	pointers()
 }
 
 func learnVariables() {
@@ -299,6 +300,18 @@ func passByValue() {
 	fmt.Println(menu)
 }
 
+func pointers() {
+	name := "Mahrukh Ameen"
+	fmt.Println(name)
+	fmt.Println("memory address of name is:", &name) //&name returns the memory address
+	memory := &name
+	updateNameUsingPointer(memory) //stores the memory address of name variabl
+	fmt.Println("memory address:", memory)
+	fmt.Println("value at memory address:", *memory) //returns the value that will be present at that memory address
+	//it will update the original value of name variable
+	fmt.Println(name)
+}
+
 func sayGreetings(name string) {
 	fmt.Println("hello", name)
 }
@@ -341,4 +354,8 @@ func updateNameFun(name string) string {
 
 func updateMenu(y map[string]float64) {
 	y["coffee"] = 2.99
+}
+
+func updateNameUsingPointer(name *string) {
+	*name = "Mahrukh"
 }
