@@ -6,6 +6,7 @@ import (
 	"math"
 	"os"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -30,7 +31,8 @@ func main() { //main function is the entry point of the go code
 	// recieverFunctions()
 	// recieverFunctionsWithPointers()
 	// userInputs()
-	switchStatement()
+	// switchStatement()
+	parsingFloats()
 }
 
 func learnVariables() {
@@ -373,6 +375,44 @@ func switchStatement() {
 	}
 }
 
+func parsingFloats() {
+	myBill := createBill()
+
+	reader := bufio.NewReader(os.Stdin)
+	opt, _ := getInput("Choose Option (a - add item, s - save bill, t - add tip): ", reader)
+
+	switch opt {
+	case "a":
+		name, _ := getInput("Item name: ", reader)
+		price, _ := getInput("Item Price: ", reader)
+
+		p, err := strconv.ParseFloat(price, 64)
+		if err != nil {
+			fmt.Println("Price must be a number")
+			promptOptions(myBill)
+		}
+		myBill.addItem(name, p)
+		myBill.format()
+		fmt.Println("Item added - ", name, price)
+		promptOptions(myBill)
+	case "t":
+		tip, _ := getInput("Enter tip amount ($): ", reader)
+		t, err := strconv.ParseFloat(tip, 64)
+		if err != nil {
+			fmt.Println("Price must be a number")
+			promptOptions(myBill)
+		}
+		myBill.updateTip(t)
+		myBill.format()
+		fmt.Println("Tip added: ", tip)
+		promptOptions(myBill)
+	case "s":
+		fmt.Println("You chose to save the bill")
+	default:
+		fmt.Println("That was not a valid option")
+		promptOptions(myBill)
+	}
+}
 func sayGreetings(name string) {
 	fmt.Println("hello", name)
 }
