@@ -24,7 +24,7 @@ func newBill(name string) bill {
 
 // Here we are going to create a function named format which is asscoaited with the bill struct which will be a reciever function
 // format the bill
-func (b bill) format() string { //to make it associated with bill struct we need to specify the bill object
+func (b *bill) format() string { //to make it associated with bill struct we need to specify the bill object
 	//here (b bill) is recieved in the function
 	fs := "Bill breakdown: \n" //fs is formatted string
 	var total float64 = 0
@@ -35,8 +35,24 @@ func (b bill) format() string { //to make it associated with bill struct we need
 		total += value
 	}
 
+	//add tip
+	fs += fmt.Sprintf("%-25v ...$%v\n", "tip:", b.tip)
+
 	//total
 	fs += fmt.Sprintf("%-25v ...$%0.2f", "total:", total)
 
 	return fs
 }
+
+//update tip
+func (b *bill) updateTip(tip float64) { //here we are passing the refernece of the bill
+	(*b).tip = tip //here we dereference the bill so that it can update the value and not making the copy of the object
+	//b.tip = tip // this cal also update the value but it is not a good practice
+}
+
+//add an item to the bill
+func (b *bill) addItem(name string, price float64) {
+	b.items[name] = price
+}
+
+//pointers aur automatically dereferenced
