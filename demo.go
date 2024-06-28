@@ -24,7 +24,8 @@ func main() { //main function is the entry point of the go code
 	// maps()
 	// passByValue()
 	// pointers()
-	structs()
+	// structs()
+	recieverFunctions()
 }
 
 func learnVariables() {
@@ -323,6 +324,12 @@ func structs() {
 		fmt.Println(k, "-", value)
 	}
 	fmt.Println("Tip:", myBill.tip)
+}
+
+func recieverFunctions() {
+	myBill := newBill("Mahrukh's Bill")
+	fmt.Println("Name of Bill:", myBill.name)
+	fmt.Println(myBill.format())
 }
 
 func sayGreetings(name string) {

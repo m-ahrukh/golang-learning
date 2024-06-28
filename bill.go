@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 type bill struct {
 	name  string
 	items map[string]float64
@@ -18,4 +20,23 @@ func newBill(name string) bill {
 		tip: 10.0,
 	}
 	return b
+}
+
+// Here we are going to create a function named format which is asscoaited with the bill struct which will be a reciever function
+// format the bill
+func (b bill) format() string { //to make it associated with bill struct we need to specify the bill object
+	//here (b bill) is recieved in the function
+	fs := "Bill breakdown: \n" //fs is formatted string
+	var total float64 = 0
+
+	//list items
+	for k, value := range b.items {
+		fs += fmt.Sprintf("%-25v ...$%v\n", k+":", value)
+		total += value
+	}
+
+	//total
+	fs += fmt.Sprintf("%-25v ...$%0.2f", "total:", total)
+
+	return fs
 }
