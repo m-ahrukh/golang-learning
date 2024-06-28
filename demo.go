@@ -23,7 +23,8 @@ func main() { //main function is the entry point of the go code
 	// packageScope()
 	// maps()
 	// passByValue()
-	pointers()
+	// pointers()
+	structs()
 }
 
 func learnVariables() {
@@ -310,6 +311,18 @@ func pointers() {
 	fmt.Println("value at memory address:", *memory) //returns the value that will be present at that memory address
 	//it will update the original value of name variable
 	fmt.Println(name)
+}
+
+func structs() {
+	//structs are the custom data types having multiple datatype variables
+	//it is basically a bluprint to describe type of data
+	myBill := newBill("Mahrukh's Bill")
+	fmt.Println("Name of Bill:", myBill.name)
+	fmt.Println("Items purchased")
+	for k, value := range myBill.items {
+		fmt.Println(k, "-", value)
+	}
+	fmt.Println("Tip:", myBill.tip)
 }
 
 func sayGreetings(name string) {
