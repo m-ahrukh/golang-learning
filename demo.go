@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bufio"
 	"fmt" // fmt is used for IO operations
 	"math"
+	"os"
 	"sort"
 	"strings"
 )
@@ -26,7 +28,8 @@ func main() { //main function is the entry point of the go code
 	// pointers()
 	// structs()
 	// recieverFunctions()
-	recieverFunctionsWithPointers()
+	// recieverFunctionsWithPointers()
+	userInputs()
 }
 
 func learnVariables() {
@@ -341,6 +344,12 @@ func recieverFunctionsWithPointers() {
 	fmt.Println(myBill.format())
 }
 
+func userInputs() {
+	myBill := createBill()
+	fmt.Println(myBill)
+	promptOptions(myBill)
+}
+
 func sayGreetings(name string) {
 	fmt.Println("hello", name)
 }
@@ -387,4 +396,29 @@ func updateMenu(y map[string]float64) {
 
 func updateNameUsingPointer(name *string) {
 	*name = "Mahrukh"
+}
+
+func createBill() bill {
+	reader := bufio.NewReader(os.Stdin)
+	// fmt.Print("Create a new bill name: ")
+	// name, _ := reader.ReadString('\n')
+	// name = strings.TrimSpace(name)
+
+	name, _ := getInput("Create a new bill name: ", reader)
+	b := newBill(name)
+	fmt.Println("Created the bill - ", b.name)
+	return b
+}
+
+func getInput(prompt string, r *bufio.Reader) (string, error) {
+	fmt.Print(prompt)
+	input, err := r.ReadString('\n')
+
+	return strings.TrimSpace(input), err
+}
+
+func promptOptions(b bill) {
+	reader := bufio.NewReader(os.Stdin)
+	opt, _ := getInput("Choose Option (a - add item, s - save bill, t - add tip): ", reader)
+	fmt.Println(opt)
 }
