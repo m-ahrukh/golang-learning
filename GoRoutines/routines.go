@@ -15,6 +15,9 @@ var wg sync.WaitGroup //usually wait group is pointer but fr now we are dealing 
 // 2. done -> if all go routines are executes, its the done method responsibiity to tell that all go routines are executed successfully
 // 3. wait -> wait for all other go routines that are being executed till now
 
+var signals = []string{"test"}
+var mut sync.Mutex
+
 func main() {
 	//concurrency is doing multiple tasks one by one
 	//parallelism is doing multiple tasks at the same time
@@ -57,7 +60,11 @@ func main() {
 		wg.Add(1)
 	}
 
-	wg.Wait() // this will not allow main method to exit until all the go routines are executed
+	wg.Wait()            // this will not allow main method to exit until all the go routines are executed
+	fmt.Println(signals) //if there are multiple go routines (in this cae ony one go routine is executed), it causes problem which is every go routine is simultaneously accessing and writing the signals slice.
+	//to prevent this problem, we apply locks (mutex locks)
+
+	//mutex is mutual exclusion lock. if mutex value is zero, it means this is unlocked mutex
 
 }
 
@@ -75,6 +82,9 @@ func getStatusCode(endpoint string) {
 	if err != nil {
 		fmt.Println("oops error in endpoint", endpoint)
 	} else {
+		mut.Lock()
+		signals = append(signals, endpoint)
+		mut.Unlock()
 		fmt.Printf("%d status code for %s\n", res.StatusCode, endpoint)
 	}
 
