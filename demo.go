@@ -32,7 +32,71 @@ func main() { //main function is the entry point of the go code
 	// recieverFunctionsWithPointers()
 	// userInputs()
 	// switchStatement()
-	parsingFloats()
+	// parsingFloats()
+	savingFlies()
+	// interfaces()
+
+	//capacity (kitny size ki array bni hui) and size (elements in array) in slice
+	// no exceptions in Go. errors hongy
+
+	// cm := coffeeMaker{}
+	// process(cm, 5)
+	// print(10)
+	// print("hello")
+	// print(10.97)
+
+}
+
+func print(a interface{}) {
+	fmt.Println(a)
+}
+
+//capital kreingy to export ho jayga package se bahir bhi visible ho jayga
+//small kreingy to package scope mein rhyga
+
+//struct will implement all the available interfaces implicitly
+
+type Maker interface {
+	make(a int)
+	makeWith(x int)
+}
+
+type coffeeMaker struct {
+}
+
+func (cm coffeeMaker) make(a int) {
+	fmt.Printf("I'm making for %d\n", a)
+}
+
+func (cm coffeeMaker) makeWith(a int) {
+	fmt.Printf("I'm making with %d\n", a)
+}
+
+func process(m Maker, a int) {
+	m.make(a)
+	m.makeWith(10)
+}
+
+//empty interface -> any interface
+
+func textSlices() {
+	a := make([]int, 0, 20) //capacity hm define krty hain to avoid memory wastage
+
+	fmt.Println(len(a), cap(a))
+	a = append(a, 8)
+	fmt.Println(len(a), cap(a))
+	a = append(a, 4)
+	fmt.Println(len(a), cap(a))
+	a = append(a, 6)
+	fmt.Println(len(a), cap(a))
+	a = append(a, 5)
+	fmt.Println(len(a), cap(a))
+	a = append(a, 1)
+	a = append(a, 0)
+	a = append(a, 3)
+	a = append(a, 12)
+	a = append(a, 18)
+	fmt.Println(len(a), cap(a))
 }
 
 func learnVariables() {
@@ -413,6 +477,52 @@ func parsingFloats() {
 		promptOptions(myBill)
 	}
 }
+
+func savingFlies() {
+	myBill := createBill()
+
+	reader := bufio.NewReader(os.Stdin)
+	opt, _ := getInput("Choose Option (a - add item, s - save bill, t - add tip): ", reader)
+
+	switch opt {
+	case "a":
+		name, _ := getInput("Item name: ", reader)
+		price, _ := getInput("Item Price: ", reader)
+
+		p, err := strconv.ParseFloat(price, 64)
+		if err != nil {
+			fmt.Println("Price must be a number")
+			opt = promptOptions(myBill)
+			fmt.Println("-->", opt)
+		}
+		myBill.addItem(name, p)
+		// myBill.format()
+		fmt.Println("Item added - ", name, price)
+		opt = promptOptions(myBill)
+		fmt.Println("-->", opt)
+	case "t":
+		tip, _ := getInput("Enter tip amount ($): ", reader)
+		t, err := strconv.ParseFloat(tip, 64)
+		if err != nil {
+			fmt.Println("Price must be a number")
+			opt = promptOptions(myBill)
+			fmt.Println("-->", opt)
+		}
+		myBill.updateTip(t)
+		myBill.format()
+		fmt.Println("Tip added: ", tip)
+		opt = promptOptions(myBill)
+		fmt.Println("-->", opt)
+	case "s":
+		myBill.save()
+		fmt.Println("You csaved thi file - ", myBill.name)
+	default:
+		fmt.Println("That was not a valid option")
+		opt = promptOptions(myBill)
+		fmt.Println("-->", opt)
+	}
+}
+
 func sayGreetings(name string) {
 	fmt.Println("hello", name)
 }
@@ -480,8 +590,9 @@ func getInput(prompt string, r *bufio.Reader) (string, error) {
 	return strings.TrimSpace(input), err
 }
 
-func promptOptions(b bill) {
+func promptOptions(b bill) string {
 	reader := bufio.NewReader(os.Stdin)
 	opt, _ := getInput("Choose Option (a - add item, s - save bill, t - add tip): ", reader)
-	fmt.Println(opt)
+	// fmt.Println(opt)
+	return opt
 }

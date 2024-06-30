@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
 type bill struct {
 	name  string
@@ -45,15 +48,25 @@ func (b *bill) format() string { //to make it associated with bill struct we nee
 	return fs
 }
 
-//update tip
+// update tip
 func (b *bill) updateTip(tip float64) { //here we are passing the refernece of the bill
 	(*b).tip = tip //here we dereference the bill so that it can update the value and not making the copy of the object
 	//b.tip = tip // this cal also update the value but it is not a good practice
 }
 
-//add an item to the bill
+// add an item to the bill
 func (b *bill) addItem(name string, price float64) {
 	b.items[name] = price
 }
 
 //pointers aur automatically dereferenced
+
+// save bill
+func (b *bill) save() {
+	data := []byte(b.format())
+	err := os.WriteFile("bills/"+b.name+".txt", data, 0644)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("bill was saved to file")
+}

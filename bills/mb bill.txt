@@ -1,0 +1,5 @@
+Bill breakdown: 
+noodles                   ...50
+lays                      ...40
+tip:                      ...$0
+total:                    ...$0.00
