@@ -33,17 +33,11 @@ func main() { //main function is the entry point of the go code
 	// userInputs()
 	// switchStatement()
 	// parsingFloats()
-	savingFlies()
-	// interfaces()
+	// savingFlies()
+	interfaces()
 
 	//capacity (kitny size ki array bni hui) and size (elements in array) in slice
 	// no exceptions in Go. errors hongy
-
-	// cm := coffeeMaker{}
-	// process(cm, 5)
-	// print(10)
-	// print("hello")
-	// print(10.97)
 
 }
 
@@ -78,6 +72,43 @@ func process(m Maker, a int) {
 }
 
 //empty interface -> any interface
+
+// shape interface
+type shape interface {
+	area() float64
+	circumf() float64
+}
+
+type square struct {
+	length float64
+}
+
+type circle struct {
+	radius float64
+}
+
+// square methods
+func (s square) area() float64 {
+	return s.length * s.length
+}
+
+func (s square) circumf() float64 {
+	return s.length * 4
+}
+
+// circle methods
+func (c circle) area() float64 {
+	return math.Pi * c.radius * c.radius
+}
+
+func (c circle) circumf() float64 {
+	return 2 * math.Pi * c.radius
+}
+
+func printShapeInfo(s shape) {
+	fmt.Printf("area of %T is: %0.2f \n", s, s.area())
+	fmt.Printf("circumference of %T is: %0.2f\n", s, s.circumf())
+}
 
 func textSlices() {
 	a := make([]int, 0, 20) //capacity hm define krty hain to avoid memory wastage
@@ -525,6 +556,23 @@ func savingFlies() {
 
 func sayGreetings(name string) {
 	fmt.Println("hello", name)
+}
+
+func interfaces() {
+	cm := coffeeMaker{}
+	process(cm, 5)
+
+	shape := []shape{
+		square{length: 15.2},
+		circle{radius: 7.5},
+		circle{radius: 12.3},
+		square{length: 4.9},
+	}
+
+	for _, v := range shape {
+		printShapeInfo(v)
+		fmt.Println("----")
+	}
 }
 
 func sayBye(name string) {
