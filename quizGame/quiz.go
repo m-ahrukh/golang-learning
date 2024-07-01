@@ -7,20 +7,24 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 )
 
 func main() {
 	fmt.Println("Quiz Game")
 
-	filename := flag.String("file", "problems.csv", "CSV file containing quiz questions")
+	filename := flag.String("file", "problems", "CSV file containing quiz questions")
+	timeLimit := flag.Int("limit", 30, "Time Limit for each question")
 	flag.Parse()
 
+	*filename += ".csv"
 	//open specific file in read-only mode
 	// file, err := os.Open("problems.csv")
-	file, err := os.Open(*filename + ".csv")
+	file, err := os.Open(*filename)
 
 	if err != nil {
 		fmt.Println("Error:", err)
+		return
 	}
 
 	//close file
@@ -30,6 +34,7 @@ func main() {
 	inputReader := bufio.NewReader(os.Stdin)
 
 	questions, err := reader.ReadAll()
+	timer := time.NewTimer(time.Duration(*timeLimit) * time.Second)
 
 	if err != nil {
 		fmt.Println("Error in reading questions")
@@ -37,15 +42,28 @@ func main() {
 
 	var score = 0
 	for _, question := range questions {
-		opt, _ := getInput(question[0]+" = ", inputReader)
-		if opt == question[1] {
-			score++
+		select {
+		case <-timer.C:
+			fmt.Println("Your time been been finished")
+			fmt.Println("----------Score Card----------")
+			fmt.Printf("|you answered %d/%d questions |\n", score, len(questions))
+			fmt.Printf("|Total questions: %d         |\n", len(questions))
+			fmt.Printf("|Correct answers: %d          |\n", score)
+			fmt.Printf("|Incorrect answers: %d       |\n", len(questions)-score)
+			fmt.Println("------------------------------")
+			return
+		default:
+			opt, _ := getInput(question[0]+" = ", inputReader)
+			if opt == question[1] {
+				score++
+			}
 		}
+
 	}
-	fmt.Printf("you answered %d/%d questions\n", score, len(questions))
-	fmt.Printf("Total questions: %d\n", len(questions))
-	fmt.Printf("Correct answers: %d\n", score)
-	fmt.Printf("Incorrect answers: %d\n", len(questions)-score)
+	// fmt.Printf("you answered %d/%d questions\n", score, len(questions))
+	// fmt.Printf("Total questions: %d\n", len(questions))
+	// fmt.Printf("Correct answers: %d\n", score)
+	// fmt.Printf("Incorrect answers: %d\n", len(questions)-score)
 }
 
 func getInput(prompt string, r *bufio.Reader) (string, error) {
