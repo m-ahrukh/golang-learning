@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"encoding/csv"
 	"fmt"
 	"os"
+	"strings"
 )
 
 func main() {
@@ -20,14 +22,27 @@ func main() {
 	defer file.Close()
 
 	reader := csv.NewReader(file)
+	inputReader := bufio.NewReader(os.Stdin)
 
 	questions, err := reader.ReadAll()
+	// opt, _ := getInput(inputReader)
 
 	if err != nil {
 		fmt.Println("Error in reading questions")
 	}
 
+	var score = 0
 	for _, question := range questions {
-		fmt.Println(question[0][0], "+", question[0][0], "=", question[1])
+		opt, _ := getInput(question[0]+" = ", inputReader)
+		if opt == question[1] {
+			score++
+		}
 	}
+	fmt.Printf("you answered %d/%d questions", score, len(questions))
+}
+
+func getInput(prompt string, r *bufio.Reader) (string, error) {
+	fmt.Print(prompt)
+	input, err := r.ReadString('\n')
+	return strings.TrimSpace(input), err
 }
