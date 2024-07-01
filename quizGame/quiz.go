@@ -41,29 +41,43 @@ func main() {
 	}
 
 	var score = 0
+loop:
 	for _, question := range questions {
+
+		answerCh := make(chan string)
+
+		go func() {
+			opt, _ := getInput(question[0]+" = ", inputReader)
+			answerCh <- opt
+		}()
+
 		select {
 		case <-timer.C:
-			fmt.Println("Your time been been finished")
-			fmt.Println("----------Score Card----------")
-			fmt.Printf("|you answered %d/%d questions |\n", score, len(questions))
-			fmt.Printf("|Total questions: %d         |\n", len(questions))
-			fmt.Printf("|Correct answers: %d          |\n", score)
-			fmt.Printf("|Incorrect answers: %d       |\n", len(questions)-score)
-			fmt.Println("------------------------------")
-			return
-		default:
-			opt, _ := getInput(question[0]+" = ", inputReader)
+			// fmt.Println("\nYour time been been finished")
+			// fmt.Println("----------Score Card----------")
+			// fmt.Printf("|you answered %d/%d questions |\n", score, len(questions))
+			// fmt.Printf("|Total questions: %d         |\n", len(questions))
+			// fmt.Printf("|Correct answers: %d          |\n", score)
+			// fmt.Printf("|Incorrect answers: %d       |\n", len(questions)-score)
+			// fmt.Println("------------------------------")
+			// return
+			fmt.Println()
+			break loop //goto statement
+		case opt := <-answerCh:
+			// opt, _ := getInput(question[0]+" = ", inputReader)
 			if opt == question[1] {
 				score++
 			}
 		}
 
 	}
-	// fmt.Printf("you answered %d/%d questions\n", score, len(questions))
-	// fmt.Printf("Total questions: %d\n", len(questions))
-	// fmt.Printf("Correct answers: %d\n", score)
-	// fmt.Printf("Incorrect answers: %d\n", len(questions)-score)
+	fmt.Println("\nYour time been been finished")
+	fmt.Println("----------Score Card----------")
+	fmt.Printf("|you answered %d/%d questions |\n", score, len(questions))
+	fmt.Printf("|Total questions: %d         |\n", len(questions))
+	fmt.Printf("|Correct answers: %d          |\n", score)
+	fmt.Printf("|Incorrect answers: %d       |\n", len(questions)-score)
+	fmt.Println("------------------------------")
 }
 
 func getInput(prompt string, r *bufio.Reader) (string, error) {
