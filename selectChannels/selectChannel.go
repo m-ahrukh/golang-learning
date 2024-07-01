@@ -12,11 +12,11 @@ func main() {
 	yellowCh := make(chan string)
 	redCh := make(chan string)
 
-	// go green(greenCh)
-	// go yellow(yellowCh)
-	// go red(redCh)
+	go green(greenCh)
+	go yellow(yellowCh)
+	go red(redCh)
 
-	fmt.Println("Waiting fot mesages.. Blocked here")
+	fmt.Print("Waiting fot mesages.. Blocked here")
 	for {
 		select {
 		case msg := <-greenCh:
@@ -26,10 +26,8 @@ func main() {
 		case msg := <-redCh:
 			fmt.Println(msg)
 		}
+
 	}
-	go green(greenCh)
-	go yellow(yellowCh)
-	go red(redCh)
 }
 
 func green(green chan string) {
