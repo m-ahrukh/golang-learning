@@ -51,17 +51,28 @@ func YAMLHandler(yml []byte, fallback http.Handler) (yamlHandler http.HandlerFun
 		return
 	}
 
-	builtMap := make(map[string]string)
+	// builtMap := make(map[string]string)
 
-	for _, singePathToUrl := range parsedYaml {
-		builtMap[singePathToUrl.path] += singePathToUrl.url
-	}
+	// for _, singePathToUrl := range parsedYaml {
+	// 	builtMap[singePathToUrl.path] += singePathToUrl.url
+	// }
 
-	yamlHandler = MapHandler(builtMap, fallback)
-	return
+	// yamlHandler = MapHandler(builtMap, fallback)
+
+	pathMap := buildMap(parsedYaml)
+	return MapHandler(pathMap, fallback), nil
+
 }
 
 func parseYAML(yamlData []byte) (pathsToURLs []pathToURL, err error) {
 	err = yaml.Unmarshal(yamlData, &pathsToURLs)
+	return
+}
+
+func buildMap(pathsToURLs []pathToURL) (builtMap map[string]string) {
+	builtMap = make(map[string]string)
+	for _, singePathToUrl := range pathsToURLs {
+		builtMap[singePathToUrl.path] += singePathToUrl.url
+	}
 	return
 }
