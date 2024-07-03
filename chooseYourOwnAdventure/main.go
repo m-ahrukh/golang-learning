@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"text/template"
 )
 
@@ -87,8 +88,27 @@ type handler struct {
 func (h handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	htmlTemplate := template.Must(template.New("").Parse(defaultTemplate))
 
-	err := htmlTemplate.Execute(w, h.story["intro"])
-	if err != nil {
-		fmt.Println("Error:", err)
+	path := strings.TrimSpace(r.URL.Path)
+
+	if path == "" || path == "/" {
+		path = "/intro"
 	}
+
+	path = path[1:]
+
+	chapter, err := h.story[path]
+
+	if err {
+		err := htmlTemplate.Execute(w, chapter)
+		if err != nil {
+			fmt.Println("Error:", err)
+		}
+		return
+	}
+
+	http.Error(w, "Chapter not found", http.StatusNotFound)
+	// err := htmlTemplate.Execute(w, h.story["intro"])
+	// if err != nil {
+	// 	fmt.Println("Error:", err)
+	// }
 }
