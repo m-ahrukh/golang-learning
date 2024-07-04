@@ -7,7 +7,7 @@ import (
 	"unicode"
 )
 
-func solution() {
+func camelCaseSolution() {
 	fmt.Println("-----CamelCase Problem-----")
 
 	fmt.Print("Enter your string: ")

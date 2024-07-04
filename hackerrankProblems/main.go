@@ -4,6 +4,8 @@ import "fmt"
 
 func main() {
 	fmt.Println("HackerRank Problems")
-
-	solution()
+	fmt.Println("-----------------------------------")
+	camelCaseSolution()
+	fmt.Println("-----------------------------------")
+	ceaserCipherSolution()
 }
