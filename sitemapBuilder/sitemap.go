@@ -3,13 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io"
+	link "goLangLearning/sitemapBuilder/links"
 	"net/http"
-	"os"
 )
 
 // TODO:
-//     1. get page
+//     1. get page ---> completed
 //     2. parse the html of that page and extract links
 //     3. build proper urls
 //     4. filter liks with different domains
@@ -31,5 +30,7 @@ func main() {
 	}
 
 	defer response.Body.Close()
-	io.Copy(os.Stdout, response.Body) //print the html of the webpage
+	links, _ := link.Parse(response.Body)
+
+	// io.Copy(os.Stdout, response.Body) //print the html of the webpage
 }
