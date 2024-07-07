@@ -1,12 +1,14 @@
 package main
 
 import (
+	"encoding/xml"
 	"flag"
 	"fmt"
 	link "goLangLearning/sitemapBuilder/links"
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 )
 
@@ -18,6 +20,17 @@ import (
 //     5. find pages ---> done
 //     6. print xml
 
+const xmlns = "http://www.sitemaps.org/schemas/sitemap/0.9"
+
+type loc struct {
+	Value string `xml:"loc"`
+}
+
+type urlset struct {
+	Urls  []loc  `xml:"url"`
+	Xmlns string `xml:"xmlns,attr"`
+}
+
 func main() {
 	fmt.Println("Sitemap Builder Problem")
 
@@ -25,12 +38,28 @@ func main() {
 	maxDepth := flag.Int("depth", 10, "maximum depth of tree")
 	flag.Parse()
 
-	fmt.Println("url:", *urlFlag, "depth:", *maxDepth)
+	// fmt.Println("url:", *urlFlag, "depth:", *maxDepth)
 
 	pages := bfs(*urlFlag, *maxDepth)
-	for _, page := range pages {
-		fmt.Println(page)
+	// for _, page := range pages {
+	// 	fmt.Println(page)
+	// }
+
+	//XML conversion
+	toXml := urlset{
+		Xmlns: xmlns,
 	}
+	for _, page := range pages {
+		toXml.Urls = append(toXml.Urls, loc{page})
+	}
+
+	fmt.Println(xml.Header)
+	enc := xml.NewEncoder(os.Stdout)
+	enc.Indent("", " ")
+	if err := enc.Encode(toXml); err != nil {
+		panic(err)
+	}
+
 }
 
 func bfs(urlString string, maxDepth int) []string {
@@ -43,6 +72,9 @@ func bfs(urlString string, maxDepth int) []string {
 
 	for i := 0; i < maxDepth; i++ {
 		q, nq = nq, make(map[string]struct{})
+		if len(q) == 0 {
+			break
+		}
 		for url, _ := range q {
 			if _, ok := seen[url]; ok {
 				continue
@@ -69,7 +101,7 @@ func get(urlString string) []string {
 	defer response.Body.Close()
 	// io.Copy(os.Stdout, response.Body) //print the html of the webpage
 	reqUrl := response.Request.URL
-	fmt.Println(reqUrl.String())
+	// fmt.Println(reqUrl.String())
 
 	baseUrl := &url.URL{
 		Scheme: reqUrl.Scheme,
