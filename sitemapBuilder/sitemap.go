@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	link "goLangLearning/sitemapBuilder/links"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -12,28 +13,61 @@ import (
 // TODO:
 //     1. get page ---> completed
 //     2. parse the html of that page and extract links ---> done
-//     3. build proper urls
-//     4. filter liks with different domains
-//     5. find pages
+//     3. build proper urls ---> done
+//     4. filter liks with different domains ---> done
+//     5. find pages ---> done
 //     6. print xml
 
 func main() {
 	fmt.Println("Sitemap Builder Problem")
 
 	urlFlag := flag.String("url", "https://gophercises.com", "the url that you want to build a sitemap for")
+	maxDepth := flag.Int("depth", 10, "maximum depth of tree")
 	flag.Parse()
 
-	fmt.Println("url:", *urlFlag)
+	fmt.Println("url:", *urlFlag, "depth:", *maxDepth)
 
-	response, err := http.Get(*urlFlag)
+	pages := bfs(*urlFlag, *maxDepth)
+	for _, page := range pages {
+		fmt.Println(page)
+	}
+}
 
+func bfs(urlString string, maxDepth int) []string {
+	seen := make(map[string]struct{})
+	var q map[string]struct{} //queue
+
+	nq := map[string]struct{}{ //next queue
+		urlString: struct{}{},
+	}
+
+	for i := 0; i < maxDepth; i++ {
+		q, nq = nq, make(map[string]struct{})
+		for url, _ := range q {
+			if _, ok := seen[url]; ok {
+				continue
+			}
+			seen[url] = struct{}{}
+
+			for _, link := range get(url) {
+				nq[link] = struct{}{}
+			}
+		}
+	}
+	ret := make([]string, 0, len(seen))
+	for url, _ := range seen {
+		ret = append(ret, url)
+	}
+	return ret
+}
+
+func get(urlString string) []string {
+	response, err := http.Get(urlString)
 	if err != nil {
 		fmt.Println("Error:", err)
 	}
-
 	defer response.Body.Close()
 	// io.Copy(os.Stdout, response.Body) //print the html of the webpage
-
 	reqUrl := response.Request.URL
 	fmt.Println(reqUrl.String())
 
@@ -42,23 +76,36 @@ func main() {
 		Host:   reqUrl.Host,
 	}
 	base := baseUrl.String()
+	return filter(base, hrefs(response.Body, base), withPrefix(base))
+}
 
-	links, _ := link.Parse(response.Body)
-	// for _, l := range links {
-	// 	fmt.Println(l)
-	// }
+func hrefs(body io.Reader, base string) []string {
+	links, _ := link.Parse(body)
 
-	var hrefs []string
+	var ret []string
 	for _, l := range links {
 		switch {
 		case strings.HasPrefix(l.Href, "/"):
-			hrefs = append(hrefs, base+l.Href)
+			ret = append(ret, base+l.Href)
 		case strings.HasPrefix(l.Href, "http"):
-			hrefs = append(hrefs, l.Href)
+			ret = append(ret, l.Href)
 		}
 	}
+	return ret
+}
 
-	for _, href := range hrefs {
-		fmt.Println(href)
+func filter(base string, links []string, keepFn func(string) bool) []string {
+	var ret []string
+	for _, link := range links {
+		if keepFn(link) {
+			ret = append(ret, link)
+		}
+	}
+	return ret
+}
+
+func withPrefix(pfx string) func(string) bool {
+	return func(link string) bool {
+		return strings.HasPrefix(link, pfx)
 	}
 }
