@@ -54,11 +54,29 @@ func main() {
 	must(err)
 	fmt.Println("Number is:", number)
 
-	phones, err := getAllPhoneNumbers(db)
-	must(err)
-	for _, phone := range phones {
-		fmt.Println("id:", phone.id, " Number:", phone.number)
-	}
+	// phones, err := getAllPhoneNumbers(db)
+	// must(err)
+	// for _, phone := range phones {
+	// 	fmt.Println("id:", phone.id, " Number:", phone.number)
+	// }
+	// fmt.Println("Lets normalize these numbers")
+
+	// for _, phone := range phones {
+	// 	number := normalize(phone.number)
+	// 	fmt.Println("Normalized number is:", number)
+	// }
+
+	// number = "1234567890"
+	// existing, err := findPhoneNumber(db, number)
+	// must(err)
+	// fmt.Println(existing.number, " exists")
+
+	// phone := Phone{
+	// 	id:     4,
+	// 	number: "123456788",
+	// }
+	// must(updatePhoneNumber(db, phone))
+	must(deletePhoneNumber(db, 4))
 }
 
 func must(err error) {
@@ -134,6 +152,29 @@ func getAllPhoneNumbers(db *sql.DB) ([]Phone, error) {
 		return nil, err
 	}
 	return ret, nil
+}
+
+func findPhoneNumber(db *sql.DB, number string) (*Phone, error) {
+	var phone Phone
+	statement := `SELECT * FROM phone_number WHERE value = $1`
+	row := db.QueryRow(statement, number)
+	err := row.Scan(&phone.id, &phone.number)
+	if err != nil {
+		return nil, err
+	}
+	return &phone, nil
+}
+
+func updatePhoneNumber(db *sql.DB, phone Phone) error {
+	statement := `UPDATE phone_number SET value=$2 WHERE id=$1`
+	_, err := db.Exec(statement, phone.number, phone.id)
+	return err
+}
+
+func deletePhoneNumber(db *sql.DB, id int) error {
+	statement := `DELETE FROM phone_number WHERE id=$1`
+	_, err := db.Exec(statement, id)
+	return err
 }
 
 func normalize(phone string) string {
