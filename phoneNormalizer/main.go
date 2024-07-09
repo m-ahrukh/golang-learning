@@ -15,17 +15,22 @@ const (
 	dbname   = "phone_normalizer"
 )
 
+type Phone struct {
+	id     int
+	number string
+}
+
 func main() {
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s sslmode=disable", host, port, user, password)
 
-	// db, err := sql.Open("postgres", psqlInfo)
-	// must(err)
-	// err = resetDB(db, dbname)
-	// must(err)
-	// db.Close()
+	db, err := sql.Open("postgres", psqlInfo)
+	must(err)
+	err = resetDB(db, dbname)
+	must(err)
+	db.Close()
 
 	psqlInfo = fmt.Sprintf("%s dbname=%s", psqlInfo, dbname)
-	db, err := sql.Open("postgres", psqlInfo)
+	db, err = sql.Open("postgres", psqlInfo)
 	must(err)
 	defer db.Close()
 	must(createPhoneNumbersTable(db))
@@ -44,6 +49,16 @@ func main() {
 	must(err)
 	_, err = insertPhoneNumbers(db, "(123)456-7892")
 	must(err)
+
+	number, err := getPhoneNumber(db, 3)
+	must(err)
+	fmt.Println("Number is:", number)
+
+	phones, err := getAllPhoneNumbers(db)
+	must(err)
+	for _, phone := range phones {
+		fmt.Println("id:", phone.id, " Number:", phone.number)
+	}
 }
 
 func must(err error) {
@@ -85,11 +100,40 @@ func insertPhoneNumbers(db *sql.DB, phone string) (int, error) {
 	if err != nil {
 		return -1, err
 	}
-	// id, err := result.LastInsertId()
-	// if err != nil {
-	// 	return -1, err
-	// }
 	return id, nil
+}
+
+func getPhoneNumber(db *sql.DB, id int) (string, error) {
+	var number string
+	statement := `SELECT * FROM phone_number WHERE id = $1`
+	row := db.QueryRow(statement, id)
+	err := row.Scan(&id, &number)
+	if err != nil {
+		return "", err
+	}
+	return number, nil
+}
+
+func getAllPhoneNumbers(db *sql.DB) ([]Phone, error) {
+	statement := `SELECT * FROM phone_number`
+	rows, err := db.Query(statement)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var ret []Phone
+	for rows.Next() {
+		var phone Phone
+		if err := rows.Scan(&phone.id, &phone.number); err != nil {
+			return nil, err
+		}
+		ret = append(ret, phone)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return ret, nil
 }
 
 func normalize(phone string) string {
