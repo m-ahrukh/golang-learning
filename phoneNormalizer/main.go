@@ -1,22 +1,31 @@
 package main
 
-import (
-	"bufio"
-	"fmt"
-	"os"
-	"strings"
-)
+func normalize(phone string) string {
 
-func main() {
-	fmt.Println("Phone Normalizer Problem")
+	//normaize number by iterating string
+	//normalize number using regex
 
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Print("Enter your phone number: ")
-	input, err := reader.ReadString('\n')
-	if err != nil {
-		fmt.Println("Error:", err)
+	//Method 1.a
+	output := ""
+	for _, ch := range phone {
+		if ch >= '0' && ch <= '9' {
+			output = output + string(ch)
+		}
 	}
-	phoneNumber := strings.TrimSpace(input)
+	return output
 
-	fmt.Println("Phone Number:", phoneNumber)
+	//Method 1.b
+	// var buf bytes.Buffer
+	// for _, ch := range phone {
+	// 	if ch >= '0' && ch <= '9' {
+	// 		buf.WriteRune(ch)
+	// 	}
+	// }
+	// return buf.String()
+
+	//Method 2
+	// re := regexp.MustCompile("[0-9]+")
+	// matches := re.FindAllString(phone, -1)
+	// fmt.Println(strings.Join(matches, ""))
+	// return strings.Join(matches, "")
 }
