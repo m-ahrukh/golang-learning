@@ -2,10 +2,10 @@ package main
 
 import "testing"
 
-type normalizeTestCase struct {
-	input string
-	want  string
-}
+//table driven tesing -> each table entry is a complete
+//		test case with inputs and expected results and
+//		sometimes with additional information such as a test
+//		name to make the test output easily readable.
 
 //table driven test
 func TestNormalize(t *testing.T) {
