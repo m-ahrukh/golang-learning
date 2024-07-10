@@ -2,7 +2,6 @@ package db
 
 import (
 	"encoding/binary"
-	"fmt"
 	"time"
 
 	"github.com/boltdb/bolt"
@@ -51,7 +50,6 @@ func AllTasks() ([]Task, error) {
 		b := tx.Bucket(taskBucket)
 		c := b.Cursor()
 		for k, v := c.First(); k != nil; k, v = c.Next() {
-			fmt.Printf("key=%s, value=%s\n", k, v)
 			tasks = append(tasks, Task{
 				Key:   btoi(k),
 				Value: string(v),
@@ -65,7 +63,7 @@ func AllTasks() ([]Task, error) {
 	return tasks, nil
 }
 
-func deleteTask(key int) error {
+func DeleteTask(key int) error {
 	return db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket(taskBucket)
 		return b.Delete(itob(key))

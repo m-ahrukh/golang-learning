@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"goLangLearning/cliTaskManager/db"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -16,6 +17,12 @@ var addCmd = &cobra.Command{
 		// }
 
 		task := strings.Join(args, " ")
+
+		_, err := db.CreateTask(task)
+		if err != nil {
+			fmt.Println("Something went wrong:", err)
+			return
+		}
 		fmt.Printf("Task added \"%s\" to your task list\n", task)
 	},
 }

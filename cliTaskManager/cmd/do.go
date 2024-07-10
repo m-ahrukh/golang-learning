@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"goLangLearning/cliTaskManager/db"
 	"strconv"
 
 	"github.com/spf13/cobra"
@@ -11,7 +12,6 @@ var doCmd = &cobra.Command{
 	Use:   "do",
 	Short: "Marks task as completed in your list",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("do Command Called")
 		var ids []int
 		for _, arg := range args {
 			id, err := strconv.Atoi(arg)
@@ -21,7 +21,26 @@ var doCmd = &cobra.Command{
 				ids = append(ids, id)
 			}
 		}
-		fmt.Println(ids)
+		tasks, err := db.AllTasks()
+		if err != nil {
+			fmt.Println("Something went wrong:", err)
+			return
+		}
+
+		for _, id := range ids {
+			if id < 0 || id > len(tasks) {
+				fmt.Println("Invalid Task number:", id)
+				continue
+			}
+
+			task := tasks[id-1]
+			err := db.DeleteTask(task.Key)
+			if err != nil {
+				fmt.Printf("Failed to mark \"%d\" as completed. Error: %s\n", id, err)
+			} else {
+				fmt.Printf("Marked \"%d\" as completed.\n", id)
+			}
+		}
 	},
 }
 
