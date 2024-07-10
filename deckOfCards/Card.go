@@ -3,7 +3,9 @@ package deck
 
 import (
 	"fmt"
+	"math/rand"
 	"sort"
+	"time"
 )
 
 type Card struct {
@@ -83,4 +85,16 @@ func Less(cards []Card) func(i, j int) bool {
 
 func absRank(c Card) int {
 	return int(c.Suit)*int(maxRank) + int(c.Rank)
+}
+
+func Shuffle(cards []Card) []Card {
+	shuffeledCards := make([]Card, len(cards))
+	r := rand.New(rand.NewSource(time.Now().Unix()))
+	perm := r.Perm(len(cards))
+
+	// fmt.Println("permutation: ", perm)
+	for i, j := range perm {
+		shuffeledCards[i] = cards[j]
+	}
+	return shuffeledCards
 }
