@@ -1,7 +1,10 @@
 //go:generate .\stringer.exe -type=Suit,Rank
 package deck
 
-import "fmt"
+import (
+	"fmt"
+	"sort"
+)
 
 type Card struct {
 	Suit
@@ -10,6 +13,8 @@ type Card struct {
 
 type Rank uint8
 type Suit uint8
+
+var suits = [...]Suit{Spade, Diamond, Club, Heart}
 
 const (
 	Spade Suit = iota //iota initialized the value to 0 and then increment it in constants
@@ -35,6 +40,47 @@ const (
 	King
 )
 
+const (
+	minRank = Ace
+	maxRank = King
+)
+
 func (c Card) String() string {
-	return fmt.Sprintf("%s of %ss\n", c.Rank.String(), c.Suit.String())
+	return fmt.Sprintf("%s of %ss", c.Rank.String(), c.Suit.String())
+}
+
+// Helper Function
+func New(opts ...func([]Card) []Card) []Card {
+	var cards []Card
+	for _, suit := range suits {
+		for rank := minRank; rank <= maxRank; rank++ {
+			cards = append(cards, Card{Suit: suit, Rank: rank})
+		}
+	}
+	for _, opt := range opts {
+		cards = opt(cards)
+	}
+	return cards
+}
+
+func DefaultSort(cards []Card) []Card {
+	sort.Slice(cards, Less(cards))
+	return cards
+}
+
+func Sort(less func(cards []Card) func(i, j int) bool) func([]Card) []Card {
+	return func(cards []Card) []Card {
+		sort.Slice(cards, less(cards))
+		return cards
+	}
+}
+
+func Less(cards []Card) func(i, j int) bool {
+	return func(i, j int) bool {
+		return absRank(cards[i]) < absRank(cards[j])
+	}
+}
+
+func absRank(c Card) int {
+	return int(c.Suit)*int(maxRank) + int(c.Rank)
 }
