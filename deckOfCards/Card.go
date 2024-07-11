@@ -98,3 +98,13 @@ func Shuffle(cards []Card) []Card {
 	}
 	return shuffeledCards
 }
+
+func Deck(n int) func([]Card) []Card {
+	return func(cards []Card) []Card {
+		var ret []Card
+		for i := 0; i < n; i++ {
+			ret = append(ret, cards...)
+		}
+		return ret
+	}
+}
