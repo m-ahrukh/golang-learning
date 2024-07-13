@@ -1,6 +1,7 @@
 package blackjack
 
 import (
+	"errors"
 	"fmt"
 	deck "goLangLearning/deckOfCards"
 )
@@ -197,7 +198,14 @@ func (g *Game) Play(ai AI) int {
 			player := make([]deck.Card, len(g.player))
 			copy(player, g.player)
 			move := ai.Play(player, g.dealer[0])
-			move(g)
+			err := move(g)
+			switch err {
+			case errBust:
+				MoveStand(g)
+			case nil:
+			default:
+				panic(err)
+			}
 		}
 
 		for g.state == stateDealerTurn {
@@ -212,7 +220,11 @@ func (g *Game) Play(ai AI) int {
 	return g.balance
 }
 
-type Move func(*Game)
+type Move func(*Game) error
+
+var (
+	errBust = errors.New("hand score exceeded 21")
+)
 
 func (g *Game) currentPlayer() *[]deck.Card {
 	switch g.state {
@@ -225,7 +237,7 @@ func (g *Game) currentPlayer() *[]deck.Card {
 	}
 }
 
-func MoveHit(g *Game) {
+func MoveHit(g *Game) error {
 
 	currentPlayer := g.currentPlayer()
 	var card deck.Card
@@ -233,14 +245,25 @@ func MoveHit(g *Game) {
 	*currentPlayer = append(*currentPlayer, card)
 
 	if Score(*currentPlayer...) > 21 {
-		MoveStand(g)
+		// MoveStand(g)
+		return errBust
 	}
-
-	// return
+	return nil
 }
 
-func MoveStand(g *Game) {
+func MoveDouble(g *Game) error {
+	if len(g.player) > 2 {
+		return errors.New("can only double on a hand of two cards")
+
+	}
+	g.playerBet *= 2
+	MoveHit(g)
+	return MoveStand(g)
+}
+
+func MoveStand(g *Game) error {
 	g.state++
+	return nil
 }
 
 func drawCard(cards []deck.Card) (deck.Card, []deck.Card) {

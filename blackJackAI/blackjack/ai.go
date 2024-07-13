@@ -7,7 +7,7 @@ import (
 
 // Reshuffling -> done
 // add betting -> done
-// blackjack payouts
+// blackjack payouts -> done
 // doubing down (double the bet before dealer give card)
 // splitting 7,7 (if same number of cards in one hand, split it in two bets)
 
@@ -47,13 +47,15 @@ func (ai humanAI) Play(player []deck.Card, dealer deck.Card) Move {
 		fmt.Println("Player:", player)
 		fmt.Println("Dealer:", dealer)
 
-		fmt.Println("Press h for Hit or s for Stand")
+		fmt.Println("Press h for Hit, s for Stand or d for Double")
 		fmt.Scanf("%s\n", &input)
 		switch input {
 		case "h":
 			return MoveHit
 		case "s":
 			return MoveStand
+		case "d":
+			return MoveDouble
 		default:
 			fmt.Println("Invalid Option:", input)
 		}
