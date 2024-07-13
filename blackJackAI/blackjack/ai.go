@@ -10,6 +10,7 @@ import (
 // blackjack payouts
 // doubing down (double the bet before dealer give card)
 // splitting 7,7 (if same number of cards in one hand, split it in two bets)
+
 type AI interface {
 	Bet(shuffled bool) int
 	Play(player []deck.Card, dealer deck.Card) Move

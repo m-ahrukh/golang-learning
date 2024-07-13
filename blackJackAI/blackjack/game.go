@@ -75,6 +75,10 @@ func Deal(g *Game) {
 	g.state = statePlayerTurn
 }
 
+func Blackjack(hand ...deck.Card) bool {
+	return len(hand) == 2 && Score(hand...) == 21
+}
+
 func Score(cards ...deck.Card) int {
 	minScore := minScore(cards...)
 
@@ -122,14 +126,27 @@ func endGame(g *Game, ai AI) {
 	fmt.Println("Score is:", Score(g.player...))
 	fmt.Println("Score is:", Score(g.dealer...))
 	fmt.Println("----------------------------------------")
+
+	playerBlackjack, dealerBlackjack := Blackjack(g.player...), Blackjack(g.dealer...)
+
 	winnings := g.playerBet
 	switch {
+	case playerBlackjack && dealerBlackjack:
+		fmt.Println("GAME IS DRAW")
+		winnings = 0
+	case dealerBlackjack:
+		fmt.Println("DEALER'S BLACKJACK")
+		winnings *= -1
+	case playerBlackjack:
+		fmt.Println("PLAYER'S BLACKJACK")
+		winnings = int(g.blackjackPayout * float64(winnings))
 	case Score(g.player...) > 21:
 		fmt.Println("YOU BUSTED!")
 		// g.balance--
 		winnings *= -1
 	case Score(g.dealer...) > 21:
 		fmt.Println("DEALER BUSTED")
+
 		// g.balance++
 	case Score(g.player...) > Score(g.dealer...):
 		fmt.Println("YOU WIN!!")
@@ -170,6 +187,11 @@ func (g *Game) Play(ai AI) int {
 		bet(g, ai, shuffled)
 
 		Deal(g)
+
+		if Blackjack(g.dealer...) || Blackjack(g.player...) {
+			endGame(g, ai)
+			continue
+		}
 
 		for g.state == statePlayerTurn {
 			player := make([]deck.Card, len(g.player))
