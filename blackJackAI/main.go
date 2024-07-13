@@ -7,7 +7,12 @@ import (
 
 func main() {
 	fmt.Println("Blackjack AI")
-	game := blackjack.New()
+	option := blackjack.Options{
+		Decks:           2,
+		Hands:           2,
+		BlackjackPayout: 1.4,
+	}
+	game := blackjack.New(option)
 	winnings := game.Play(blackjack.HumanAI())
-	fmt.Println("Number of games win:", winnings)
+	fmt.Println(winnings)
 }

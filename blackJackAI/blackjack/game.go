@@ -13,22 +13,52 @@ const (
 	stateHandOver
 )
 
-type Game struct {
-	// unexported fields
-	deck     []deck.Card
-	state    state
-	player   []deck.Card
-	dealer   []deck.Card
-	dealerAI AI
-	balance  int
+type Options struct {
+	Decks           int
+	Hands           int
+	BlackjackPayout float64
 }
 
-func New() Game {
-	return Game{
+type Game struct {
+	// unexported fields
+	deck            []deck.Card
+	state           state
+	player          []deck.Card
+	playerBet       int
+	dealer          []deck.Card
+	dealerAI        AI
+	balance         int
+	nDecks          int
+	nHands          int
+	blackjackPayout float64
+}
+
+func New(option Options) Game {
+	g := Game{
 		state:    statePlayerTurn,
 		dealerAI: &dealerAI{},
 		balance:  0,
 	}
+
+	if option.Decks == 0 {
+		option.Decks = 3
+	}
+	if option.Hands == 0 {
+		option.Hands = 100
+	}
+	if option.BlackjackPayout == 0.0 {
+		option.BlackjackPayout = 1.5
+	}
+	g.nDecks = option.Decks
+	g.nHands = option.Decks
+	g.blackjackPayout = option.BlackjackPayout
+
+	return g
+}
+
+func bet(g *Game, ai AI, shuffled bool) {
+	bet := ai.Bet(shuffled)
+	g.playerBet = bet
 }
 
 func Deal(g *Game) {
@@ -58,7 +88,6 @@ func Score(cards ...deck.Card) int {
 		}
 	}
 	return minScore
-
 }
 
 func Soft(cards ...deck.Card) bool {
@@ -89,36 +118,56 @@ func min(a int, b int) int {
 }
 
 func endGame(g *Game, ai AI) {
+	ai.Results([][]deck.Card{g.player}, g.dealer)
 	fmt.Println("Score is:", Score(g.player...))
 	fmt.Println("Score is:", Score(g.dealer...))
+	fmt.Println("----------------------------------------")
+	winnings := g.playerBet
 	switch {
 	case Score(g.player...) > 21:
 		fmt.Println("YOU BUSTED!")
-		g.balance--
+		// g.balance--
+		winnings *= -1
 	case Score(g.dealer...) > 21:
 		fmt.Println("DEALER BUSTED")
-		g.balance++
+		// g.balance++
 	case Score(g.player...) > Score(g.dealer...):
 		fmt.Println("YOU WIN!!")
-		g.balance++
+		// g.balance++
 	case Score(g.player...) < Score(g.dealer...):
 		fmt.Println("YOU LOSE!")
-		g.balance--
+		// g.balance--
+		winnings *= -1
 	case Score(g.player...) == Score(g.dealer...):
 		fmt.Println("GAME IS DRAW")
+		winnings = 0
 	}
 	fmt.Println()
-	ai.Results([][]deck.Card{g.player}, g.dealer)
-	fmt.Println()
+	g.balance += winnings
+
 	g.player = nil
 	g.dealer = nil
 }
 
 func (g *Game) Play(ai AI) int {
-	g.deck = deck.New(deck.Deck(3))
-	g.deck = deck.Shuffle(g.deck)
+	// g.deck = deck.New(deck.Deck(g.nDecks))
+	// g.deck = deck.Shuffle(g.deck)
 
-	for i := 0; i < 2; i++ {
+	g.deck = nil
+
+	//for shuffling -> shufflilng condition
+	min := 52 * g.nDecks / 5
+
+	for i := 0; i < g.nHands; i++ {
+		shuffled := false
+		if len(g.deck) < min {
+			g.deck = deck.New(deck.Deck(g.nDecks))
+			g.deck = deck.Shuffle(g.deck)
+			shuffled = true
+		}
+
+		//betting stage
+		bet(g, ai, shuffled)
 
 		Deal(g)
 

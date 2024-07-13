@@ -5,8 +5,13 @@ import (
 	deck "goLangLearning/deckOfCards"
 )
 
+// Reshuffling -> done
+// add betting -> done
+// blackjack payouts
+// doubing down (double the bet before dealer give card)
+// splitting 7,7 (if same number of cards in one hand, split it in two bets)
 type AI interface {
-	Bet() int
+	Bet(shuffled bool) int
 	Play(player []deck.Card, dealer deck.Card) Move
 	Results(player [][]deck.Card, dealer []deck.Card)
 }
@@ -21,11 +26,17 @@ func HumanAI() AI {
 	return humanAI{}
 }
 
-func (ai humanAI) Bet() int {
-	return 1
+func (ai humanAI) Bet(shuffled bool) int {
+	if shuffled {
+		fmt.Println("Deck was just shuffled")
+	}
+	fmt.Println("What would you like to bet")
+	var bet int
+	fmt.Scanf("%d\n", &bet)
+	return bet
 }
 
-func (ai dealerAI) Bet() int {
+func (ai dealerAI) Bet(shuffled bool) int {
 	return 1
 }
 
@@ -60,7 +71,6 @@ func (ai humanAI) Results(player [][]deck.Card, dealer []deck.Card) {
 	fmt.Println("----FINAL HAND----")
 	fmt.Println("Player Cards:", player)
 	fmt.Println("Dealer Cards:", dealer)
-	fmt.Println("----------------------------------------")
 }
 
 func (ai dealerAI) Results(player [][]deck.Card, dealer []deck.Card) {
