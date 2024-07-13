@@ -182,13 +182,12 @@ func endGame(g *Game, ai AI) {
 		}
 		fmt.Println()
 		g.balance += winnings
-		// allHands = append(allHands, cards)
 	}
 
 	ai.Results(allHands, g.dealer)
 	// fmt.Println("Score is:", Score(g.player...))
 	// fmt.Println("Score is:", Score(g.dealer...))
-	fmt.Println("----------------------------------------")
+	// fmt.Println("----------------------------------------")
 
 	// playerBlackjack, dealerBlackjack := Blackjack(g.player...), Blackjack(g.dealer...)
 
@@ -269,7 +268,6 @@ func (g *Game) Play(ai AI) int {
 				MoveStand(g)
 			case nil:
 			default:
-				fmt.Println("Errorrr")
 				panic(err)
 			}
 		}
@@ -318,7 +316,7 @@ func MoveHit(g *Game) error {
 }
 
 func MoveDouble(g *Game) error {
-	if len(g.player) != 2 {
+	if len(*g.currentPlayer()) != 2 {
 		return errors.New("can only double on a hand of two cards")
 
 	}
