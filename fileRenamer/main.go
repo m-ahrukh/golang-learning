@@ -14,51 +14,50 @@ func main() {
 
 	dir := "./sample"
 
-	// f, err := os.Open(dir)
-
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// defer f.Close()
-
-	// files, err := f.ReadDir(-1)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// for _, file := range files {
-	// 	if !file.IsDir() {
-	// 		fmt.Println(file.Name())
-	// 	}
-	// }
-
-	///Returns the presend working directory
-	// wd, err := os.Getwd()
-
 	fileNames := make([]string, 0)
+	count := 0
+	type rename struct {
+		filename string
+		path     string
+	}
+
+	var toRename []struct {
+		filename string
+		path     string
+	}
+
 	var err = filepath.Walk(dir, func(path string, info fs.FileInfo, err error) error {
 		must(err)
 		if !info.IsDir() {
-			fmt.Println(filepath.Base(path))
+			// fmt.Println(filepath.Base(path))
+			fileName := filepath.Base(path)
 			fileNames = append(fileNames, filepath.Base(path))
+			_, err := match(fileName, 4)
+			if err == nil {
+				count++
+				toRename = append(toRename, rename{
+					path:     filepath.Join(dir, fileName),
+					filename: fileName,
+				})
+			}
 		}
 		return nil
 	})
-
 	must(err)
 
-	newName, err := match(fileNames[0])
+	for _, orignalPath := range toRename {
+		originalPath := filepath.Join(dir, orignalPath.filename)
+		newName, err := match(orignalPath.filename, count)
+		must(err)
+		newPath := filepath.Join(dir, newName)
+		fmt.Printf("change fileName from %s to %s\n", originalPath, newPath)
+		err = os.Rename(originalPath, newPath)
+		must(err)
 
-	if err != nil {
-		fmt.Println("no match")
-		os.Exit(1)
 	}
-
-	fmt.Println("New Name:", newName)
 }
 
-func match(filneName string) (string, error) {
+func match(filneName string, total int) (string, error) {
 	//split the string
 	pieces := strings.Split(filneName, ".")
 	fileExt := pieces[len(pieces)-1]
@@ -69,7 +68,7 @@ func match(filneName string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("%s did not match pattern", filneName)
 	}
-	return fmt.Sprintf("%s - %d.%s", name, number, fileExt), nil
+	return fmt.Sprintf("%s - %d of %d.%s", name, number, total, fileExt), nil
 }
 
 func must(err error) error {
