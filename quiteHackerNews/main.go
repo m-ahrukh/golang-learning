@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"goLangLearning/quiteHackerNews/hn"
@@ -30,25 +31,11 @@ func main() {
 func handler(numStories int, tpl *template.Template) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
-		var client hn.Client
-		ids, err := client.TopItems()
+
+		stories, err := getTopStories(numStories)
 		if err != nil {
-			http.Error(w, "Failed to load top stories", http.StatusInternalServerError)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
-		}
-		var stories []item
-		for _, id := range ids {
-			hnItem, err := client.GetItem(id)
-			if err != nil {
-				continue
-			}
-			item := parseHNItem(hnItem)
-			if isStoryLink(item) {
-				stories = append(stories, item)
-				if len(stories) >= numStories {
-					break
-				}
-			}
 		}
 		data := templateData{
 			Stories: stories,
@@ -59,7 +46,55 @@ func handler(numStories int, tpl *template.Template) http.HandlerFunc {
 			http.Error(w, "Failed to process the template", http.StatusInternalServerError)
 			return
 		}
+
 	})
+}
+
+func getTopStories(numStories int) ([]item, error) {
+	var client hn.Client
+	ids, err := client.TopItems()
+	if err != nil {
+		return nil, errors.New("failed to load storioes")
+	}
+	var stories []item
+	at := 0
+	for len(stories) < numStories {
+		need := (numStories - len(stories))
+		stories = append(stories, getStories(ids[at:at+need])...)
+		at += need
+	}
+	return stories[:numStories], nil
+}
+
+func getStories(ids []int) []item {
+
+	var client hn.Client
+
+	type result struct {
+		index int
+		item  item
+		err   error
+	}
+	results := make(chan result)
+	for i := 0; i < len(ids); i++ {
+		go func(index int, id int) {
+			hnItem, err := client.GetItem(id)
+			if err != nil {
+				results <- result{index, item{}, err}
+				return
+			}
+			item := parseHNItem(hnItem)
+			results <- result{index, item, nil}
+		}(i, ids[i])
+	}
+	stories := make([]item, len(ids))
+	for i := 0; i < len(ids); i++ {
+		res := <-results
+		if res.err == nil && isStoryLink(res.item) {
+			stories[i] = res.item
+		}
+	}
+	return stories
 }
 
 func isStoryLink(item item) bool {
