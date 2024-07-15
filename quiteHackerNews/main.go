@@ -10,8 +10,11 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 )
+
+var cache Cache
 
 func main() {
 	// parse flags
@@ -51,6 +54,14 @@ func handler(numStories int, tpl *template.Template) http.HandlerFunc {
 }
 
 func getTopStories(numStories int) ([]item, error) {
+
+	cache.mu.Lock()
+	defer cache.mu.Unlock()
+
+	if stories, valid := getCachedStories(numStories); valid {
+		return stories, nil
+	}
+
 	var client hn.Client
 	ids, err := client.TopItems()
 	if err != nil {
@@ -63,7 +74,27 @@ func getTopStories(numStories int) ([]item, error) {
 		stories = append(stories, getStories(ids[at:at+need])...)
 		at += need
 	}
+
+	// Update the cache
+	updateCache(stories)
+
 	return stories[:numStories], nil
+}
+
+func getCachedStories(numStories int) ([]item, bool) {
+	if isCacheValid() && len(cache.stories) >= numStories {
+		return cache.stories[:numStories], true
+	}
+	return nil, false
+}
+
+func updateCache(stories []item) {
+	cache.stories = stories
+	cache.expiry = time.Now().Add(5 * time.Minute) // Cache for 5 minutes
+}
+
+func isCacheValid() bool {
+	return time.Now().Before(cache.expiry)
 }
 
 func getStories(ids []int) []item {
@@ -119,4 +150,10 @@ type item struct {
 type templateData struct {
 	Stories []item
 	Time    time.Duration
+}
+
+type Cache struct {
+	stories []item
+	expiry  time.Time
+	mu      sync.Mutex
 }
