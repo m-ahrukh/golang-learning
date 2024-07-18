@@ -1,10 +1,15 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
+	"os"
 	"runtime/debug"
+
+	"github.com/alecthomas/chroma/quick"
 )
 
 func main() {
@@ -12,7 +17,27 @@ func main() {
 	mux.HandleFunc("/panic/", panicDemo)
 	mux.HandleFunc("/panic-after/", panicAfterDemo)
 	mux.HandleFunc("/", hello)
+	mux.HandleFunc("/debug/", sourceCodeHandler)
 	log.Fatal(http.ListenAndServe(":3000", devMw(mux)))
+}
+
+func sourceCodeHandler(w http.ResponseWriter, r *http.Request) {
+	path := r.FormValue("path")
+
+	// path := "E:/goLang/goLangLearning/middlewareRecoveryWithChroma/main.go" //returns the source code of main.go file
+	// path := "E:/goLang/goLangLearning/middlewareRecoveryWithChroma" //returns either this directory exists or not
+	file, err := os.Open(path)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	b := bytes.NewBuffer(nil)
+	_, err = io.Copy(b, file)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	_ = quick.Highlight(w, b.String(), "go", "html", "github")
 }
 
 func devMw(app http.Handler) http.HandlerFunc {
