@@ -1,6 +1,8 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 /*
 //simple main function prints "Hello, World"
@@ -44,6 +46,8 @@ func Hello(name string) string {
 }
 */
 
+/*
+//Functions with multiple languages
 const englishHelloPrefix = "Hello, "
 const spanishHelloPrefix = "Hola, "
 const frenchHelloPrefix = "Bonjour, "
@@ -61,6 +65,58 @@ func Hello(name string, language string) string {
 		return frenchHelloPrefix + name
 	}
 	return englishHelloPrefix + name
+}
+*/
+
+/*
+//Using Switch Statements
+const englishHelloPrefix = "Hello, "
+const spanishHelloPrefix = "Hola, "
+const frenchHelloPrefix = "Bonjour, "
+const spanish = "Spanish"
+const french = "French"
+
+func Hello(name string, language string) string {
+	if name == "" {
+		name = "World"
+	}
+	prefix := englishHelloPrefix
+	switch language {
+	case spanish:
+		prefix = spanishHelloPrefix
+	case french:
+		prefix = frenchHelloPrefix
+	}
+	return prefix + name
+}
+*/
+
+const (
+	spanish = "Spanish"
+	french  = "French"
+
+	englishHelloPrefix = "Hello, "
+	spanishHelloPrefix = "Hola, "
+	frenchHelloPrefix  = "Bonjour, "
+)
+
+func Hello(name string, language string) string {
+	if name == "" {
+		name = "World"
+	}
+	return greetingPrefix(language) + name
+}
+
+func greetingPrefix(language string) (prefix string) {
+	switch language {
+	case french:
+		prefix = frenchHelloPrefix
+	case spanish:
+		prefix = spanishHelloPrefix
+	default:
+		prefix = englishHelloPrefix
+	}
+	return
 }
 
 func main() {
