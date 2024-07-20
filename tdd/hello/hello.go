@@ -32,6 +32,8 @@ func Hello(name string) string {
 }
 */
 
+/*
+//function if empty string, return 'Hello, World'
 const englishHelloPrefix = "Hello, "
 
 func Hello(name string) string {
@@ -40,7 +42,27 @@ func Hello(name string) string {
 	}
 	return englishHelloPrefix + name
 }
+*/
+
+const englishHelloPrefix = "Hello, "
+const spanishHelloPrefix = "Hola, "
+const frenchHelloPrefix = "Bonjour, "
+const spanish = "Spanish"
+const french = "French"
+
+func Hello(name string, language string) string {
+	if name == "" {
+		name = "World"
+	}
+	if language == spanish {
+		return spanishHelloPrefix + name
+	}
+	if language == french {
+		return frenchHelloPrefix + name
+	}
+	return englishHelloPrefix + name
+}
 
 func main() {
-	fmt.Println(Hello("Mahrukh"))
+	fmt.Println(Hello("Mahrukh", "Spanish"))
 }
