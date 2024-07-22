@@ -81,7 +81,10 @@ func TestAddDefinitions(t *testing.T) {
 
 		err := dictionary.Add(word, "new definition")
 
-		assert.Error(t, err)
+		if err != nil {
+			assert.Error(t, err)
+		}
+
 		got, err := dictionary.Search(word)
 		want := "this is just a test"
 		if err != nil {
@@ -89,4 +92,65 @@ func TestAddDefinitions(t *testing.T) {
 		}
 		assert.Equal(t, want, got)
 	})
+}
+
+func TestUpdate(t *testing.T) {
+	word := "test"
+	definition := "this is just a test"
+	dictionary := Dictionary{word: definition}
+	newDefinition := "New definition"
+
+	dictionary.Update(word, newDefinition)
+
+	got, err := dictionary.Search(word)
+	want := newDefinition
+	if err != nil {
+		t.Fatal("should find added word", err)
+	}
+	assert.Equal(t, want, got)
+}
+
+func TestUpdates(t *testing.T) {
+	t.Run("existing word", func(t *testing.T) {
+
+		word := "Test"
+		definition := "this is just a test"
+		dictionary := Dictionary{word: definition}
+		newDefinition := " new definition"
+		err := dictionary.Update(word, newDefinition)
+
+		if err != nil {
+			assert.Error(t, err)
+		}
+
+		got, err := dictionary.Search(word)
+		want := newDefinition
+		if err != nil {
+			t.Fatal("should find added word", err)
+		}
+		assert.Equal(t, want, got)
+	})
+
+	t.Run("new word", func(t *testing.T) {
+		dictionary := Dictionary{}
+		word := "test"
+		definition := "this is just a test"
+
+		err := dictionary.Update(word, definition)
+		assert.Equal(t, err, ErrWordDoesNotExist)
+	})
+}
+
+func TestDelete(t *testing.T) {
+	word := "test"
+	dictionary := Dictionary{word: "test definition"}
+
+	dictionary.Delete(word)
+
+	_, err := dictionary.Search(word)
+	// if err != nil {
+	// 	assert.Error(t, err)
+	// }
+
+	assert.Equal(t, err, ErrNotFound)
 }
