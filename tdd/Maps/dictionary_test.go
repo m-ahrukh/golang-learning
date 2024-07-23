@@ -148,9 +148,6 @@ func TestDelete(t *testing.T) {
 	dictionary.Delete(word)
 
 	_, err := dictionary.Search(word)
-	// if err != nil {
-	// 	assert.Error(t, err)
-	// }
 
 	assert.Equal(t, err, ErrNotFound)
 }
