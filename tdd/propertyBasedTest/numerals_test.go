@@ -70,10 +70,22 @@ func TestRomanNumerals(t *testing.T) {
 }
 
 func TestConvertingToArabic(t *testing.T) {
-	for _, test := range cases[:1] {
+	for _, test := range cases {
 		t.Run(fmt.Sprintf("%q gets converted to %d", test.Roman, test.Arabic), func(t *testing.T) {
 			got := ConvertToArabic(test.Roman)
 			assert.Equal(t, got, test.Arabic)
 		})
 	}
 }
+
+// func TestPropertiesOfConversion(t *testing.T) {
+// 	assertion := func(arabic int) bool {
+// 		roman := ConvertToRoman(arabic)
+// 		fromRoman := ConvertToArabic(roman)
+// 		return fromRoman == arabic
+// 	}
+
+// 	if err := quick.Check(assertion, nil); err != nil {
+// 		t.Error("failed checks", err)
+// 	}
+// }

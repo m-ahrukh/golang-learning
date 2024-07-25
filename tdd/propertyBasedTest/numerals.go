@@ -78,11 +78,26 @@ func ConvertToRoman(arabic int) string {
 }
 
 func ConvertToArabic(roman string) int {
-	if roman == "III" {
-		return 3
+	// if roman == "III" {
+	// 	return 3
+	// }
+	// if roman == "II" {
+	// 	return 2
+	// }
+	// return 1
+
+	// total := 0
+	// for range roman {
+	// 	total++
+	// }
+	// return total
+
+	var arabic = 0
+	for _, numeral := range RomanNumerals {
+		for strings.HasPrefix(roman, numeral.Symbol) {
+			arabic += numeral.Value
+			roman = strings.TrimPrefix(roman, numeral.Symbol)
+		}
 	}
-	if roman == "II" {
-		return 2
-	}
-	return 1
+	return arabic
 }
