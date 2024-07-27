@@ -8,9 +8,26 @@ import (
 )
 
 func TestNewBlogPosts(t *testing.T) {
+
+	const (
+		firstBody = `Title: Post 1
+Description: Description 1
+Tags: tdd, go
+---
+Hello
+World`
+		secondBody = `Title: Post 2
+Description: Description 2
+Tags: rust, borrow-checker
+---
+B
+L
+M`
+	)
+
 	fs := fstest.MapFS{
-		"hello world.md":  {Data: []byte("hi")},
-		"hello-world2.md": {Data: []byte("hola")},
+		"hello world.md":  {Data: []byte(firstBody)},
+		"hello-world2.md": {Data: []byte(secondBody)},
 	}
 	posts, err := NewPostsFromFS(fs)
 
@@ -22,6 +39,7 @@ func TestNewBlogPosts(t *testing.T) {
 	}
 
 	got := posts[0]
-	want := Post{Title: "Post 1"}
+	want := Post{Title: "Post 1", Description: "Description 1", Tags: []string{"tdd", "go"}, Body: `Hello
+World`}
 	assert.Equal(t, want, got)
 }

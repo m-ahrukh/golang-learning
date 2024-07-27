@@ -1,8 +1,18 @@
 package blogposts
 
 import (
+	"bufio"
+	"bytes"
+	"fmt"
 	"io"
 	"io/fs"
+	"strings"
+)
+
+const (
+	titleSeparator       = "Title: "
+	descriptionSeparator = "Description: "
+	tagsSeparator        = "Tags: "
 )
 
 func NewPostsFromFS(fileSystem fs.FS) ([]Post, error) {
@@ -16,7 +26,7 @@ func NewPostsFromFS(fileSystem fs.FS) ([]Post, error) {
 	// }
 
 	for _, f := range dir {
-		post, err := getPost(fileSystem, f)
+		post, err := getPost(fileSystem, f.Name())
 		if err != nil {
 			return nil, err
 		}
@@ -25,8 +35,8 @@ func NewPostsFromFS(fileSystem fs.FS) ([]Post, error) {
 	return posts, nil
 }
 
-func getPost(fileSystem fs.FS, f fs.DirEntry) (Post, error) {
-	postFile, err := fileSystem.Open(f.Name())
+func getPost(fileSystem fs.FS, fileName string) (Post, error) {
+	postFile, err := fileSystem.Open(fileName)
 	if err != nil {
 		return Post{}, err
 	}
@@ -43,11 +53,54 @@ func getPost(fileSystem fs.FS, f fs.DirEntry) (Post, error) {
 	return newPost(postFile)
 }
 
-func newPost(postFile fs.File) (Post, error) {
-	postData, err := io.ReadAll(postFile)
-	if err != nil {
-		return Post{}, err
+func newPost(postBody io.Reader) (Post, error) {
+	// postData, err := io.ReadAll(postFile)
+	// if err != nil {
+	// 	return Post{}, err
+	// }
+	// post := Post{Title: string(postData)}
+	// return post, nil
+
+	scanner := bufio.NewScanner(postBody)
+
+	// scanner.Scan()
+	// titleLine := scanner.Text()
+
+	// scanner.Scan()
+	// descriptionLine := scanner.Text()
+
+	// return Post{Title: titleLine[7:], Description: descriptionLine[13:]}, nil
+
+	// readLine := func() string {
+	// 	scanner.Scan()
+	// 	return scanner.Text()
+	// }
+
+	// title := readLine()[len(titleSeparator):]
+	// description := readLine()[len(descriptionSeparator):]
+
+	// return Post{Title: title, Description: description}, nil
+
+	readMetaLine := func(tagName string) string {
+		scanner.Scan()
+		return strings.TrimPrefix(scanner.Text(), tagName)
 	}
-	post := Post{Title: string(postData)}
-	return post, nil
+
+	title := readMetaLine(titleSeparator)
+	description := readMetaLine(descriptionSeparator)
+	tags := strings.Split(readMetaLine(tagsSeparator), ", ")
+
+	scanner.Scan()
+	buf := bytes.Buffer{}
+	for scanner.Scan() {
+		fmt.Fprintln(&buf, scanner.Text())
+	}
+	body := strings.TrimSuffix(buf.String(), "\n")
+
+	return Post{
+		Title:       title,
+		Description: description,
+		Tags:        tags,
+		Body:        body,
+	}, nil
 }
