@@ -49,3 +49,13 @@ func TestSumAllTails(t *testing.T) {
 		assert.Equal(t, want, got)
 	})
 }
+
+func TestReduce(t *testing.T) {
+	t.Run("multiplication of all elements", func(t *testing.T) {
+		multiply := func(x, y int) int {
+			return x * y
+		}
+		want := Reduce([]int{1, 2, 3}, multiply, 1)
+		assert.Equal(t, want, 6)
+	})
+}
