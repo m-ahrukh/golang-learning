@@ -15,8 +15,18 @@ type PlayerServer struct {
 }
 
 func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method == http.MethodPost {
+		w.WriteHeader(http.StatusAccepted)
+		return
+	}
+
 	player := strings.TrimPrefix(r.URL.Path, "/players/")
-	w.WriteHeader(http.StatusNotFound)
+	score := p.store.GetPlayersScore(player)
+	if score == 0 {
+		w.WriteHeader(http.StatusNotFound)
+	}
+	// w.WriteHeader(http.StatusNotFound)
 
 	// if player == "Pepper" {
 	// 	fmt.Fprint(w, "20")
@@ -28,7 +38,8 @@ func (p *PlayerServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// 	return
 	// }
 
-	fmt.Fprint(w, p.store.GetPlayersScore(player))
+	// fmt.Fprint(w, p.store.GetPlayersScore(player))
+	fmt.Fprint(w, score)
 
 }
 
