@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -28,24 +29,12 @@ func TestGETPlayers(t *testing.T) {
 		},
 		nil,
 	}
-	// server := &PlayerServer{&store}
 	server := NewPlayerServer(&store)
 
 	t.Run("returns Pepper's score", func(t *testing.T) {
-		// request, _ := http.NewRequest(http.MethodGet, "/players/Pepper", nil)
-		// response := httptest.NewRecorder()
-
-		// PlayerServer(response, request)
-
-		// got := response.Body.String()
-		// want := "20"
-
-		// assert.Equal(t, want, got)
-
 		request := newGetScoreRequest("Pepper")
 		response := httptest.NewRecorder()
 
-		// PlayerServer(response, request)
 		server.ServeHTTP(response, request)
 
 		assertStatus(t, response.Code, http.StatusOK)
@@ -53,19 +42,9 @@ func TestGETPlayers(t *testing.T) {
 	})
 
 	t.Run("returns Floyd's score", func(t *testing.T) {
-		// request, _ := http.NewRequest(http.MethodGet, "/players/Floyd", nil)
-		// response := httptest.NewRecorder()
-
-		// PlayerServer(response, request)
-
-		// got := response.Body.String()
-		// want := "10"
-
-		// assert.Equal(t, want, got)
 
 		request := newGetScoreRequest("Floyd")
 		response := httptest.NewRecorder()
-		// PlayerServer(response, request)
 		server.ServeHTTP(response, request)
 
 		assertStatus(t, response.Code, http.StatusOK)
@@ -95,7 +74,6 @@ func TestStoreWins(t *testing.T) {
 		nil,
 	}
 
-	// server := &PlayerServer{&store}
 	server := NewPlayerServer(&store)
 
 	t.Run("it returns accepted on POST", func(t *testing.T) {
@@ -129,8 +107,6 @@ func TestStoreWins(t *testing.T) {
 
 func TestLeague(t *testing.T) {
 	store := StubPlayerStore{}
-	//server := &PlayerServer{&store}
-	// server := NewPlayerServer(&store)
 	server := NewPlayerServer(&store)
 
 	t.Run("it returns 200 on /league", func(t *testing.T) {
@@ -138,6 +114,14 @@ func TestLeague(t *testing.T) {
 		response := httptest.NewRecorder()
 
 		server.ServeHTTP(response, request)
+
+		var got []Player
+
+		err := json.NewDecoder(response.Body).Decode(&got)
+
+		if err != nil {
+			t.Fatalf("Unable to parse response from server %q into slice of Player, '%v'", response.Body, err)
+		}
 
 		assertStatus(t, response.Code, http.StatusOK)
 	})

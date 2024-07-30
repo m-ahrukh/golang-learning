@@ -8,8 +8,6 @@ import (
 
 func TestRecordingWinsAndRetrieveingThem(t *testing.T) {
 	store := NewInMemoryPlayerStore()
-	// server := PlayerServer{store}
-	// server := NewPlayerServer(store)
 	server := NewPlayerServer(store)
 	player := "Pepper"
 
