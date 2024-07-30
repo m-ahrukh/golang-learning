@@ -13,8 +13,7 @@ type StubPlayerStore struct {
 }
 
 func (s *StubPlayerStore) GetPlayersScore(name string) int {
-	score := s.scores[name]
-	return score
+	return s.scores[name]
 }
 
 func (s *StubPlayerStore) RecordWin(name string) {
@@ -131,16 +130,16 @@ func newPostWinsRequest(name string) *http.Request {
 	return req
 }
 
+func newGetScoreRequest(name string) *http.Request {
+	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/players/%s", name), nil)
+	return req
+}
+
 func assertStatus(t testing.TB, got, want int) {
 	t.Helper()
 	if got != want {
 		t.Errorf("did not get correct status, got %d, want %d", got, want)
 	}
-}
-
-func newGetScoreRequest(name string) *http.Request {
-	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/players/%s", name), nil)
-	return req
 }
 
 func assertResponseBody(t testing.TB, got, want string) {
