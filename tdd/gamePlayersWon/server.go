@@ -49,16 +49,9 @@ func (p *PlayerServer) processWin(w http.ResponseWriter, player string) {
 	w.WriteHeader(http.StatusAccepted)
 }
 
-func (p *PlayerServer) getLeagueTable() []Player {
-	return []Player{
-		{"Mahrukh", 20},
-	}
-}
-
 func (p *PlayerServer) leagueHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("content-type", "application/json")
 	json.NewEncoder(w).Encode(p.store.GetLeague())
-
-	w.WriteHeader(http.StatusOK)
 }
 
 func (p *PlayerServer) playerHandler(w http.ResponseWriter, r *http.Request) {
