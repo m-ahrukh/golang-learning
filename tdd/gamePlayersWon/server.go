@@ -8,9 +8,9 @@ import (
 )
 
 type PlayerStore interface {
-	GetPlayersScore(name string) int
+	GetPlayerScore(name string) int
 	RecordWin(name string)
-	GetLeague() []Player
+	GetLeague() League
 }
 
 type PlayerServer struct {
@@ -39,7 +39,7 @@ func NewPlayerServer(store PlayerStore) *PlayerServer {
 }
 
 func (p *PlayerServer) showScore(w http.ResponseWriter, player string) {
-	score := p.store.GetPlayersScore(player)
+	score := p.store.GetPlayerScore(player)
 	if score == 0 {
 		w.WriteHeader(http.StatusNotFound)
 	}

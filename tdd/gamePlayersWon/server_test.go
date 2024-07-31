@@ -16,7 +16,7 @@ type StubPlayerStore struct {
 	league   []Player
 }
 
-func (s *StubPlayerStore) GetPlayersScore(name string) int {
+func (s *StubPlayerStore) GetPlayerScore(name string) int {
 	return s.scores[name]
 }
 
@@ -24,7 +24,7 @@ func (s *StubPlayerStore) RecordWin(name string) {
 	s.winCalls = append(s.winCalls, name)
 }
 
-func (s *StubPlayerStore) GetLeague() []Player {
+func (s *StubPlayerStore) GetLeague() League {
 	return s.league
 }
 func TestGETPlayers(t *testing.T) {
