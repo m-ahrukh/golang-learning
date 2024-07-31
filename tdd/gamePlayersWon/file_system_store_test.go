@@ -14,6 +14,7 @@ func TestFlieSystemStore(t *testing.T) {
 		store := FileSystemPlayerStore{database}
 
 		got := store.GetLeague()
+		got = store.GetLeague()
 
 		want := []Player{
 			{"Cleo", 10},
@@ -21,5 +22,19 @@ func TestFlieSystemStore(t *testing.T) {
 		}
 
 		assertLeague(t, got, want)
+	})
+
+	t.Run("get player score", func(t *testing.T) {
+		database := strings.NewReader(`[
+		{"Name": "Cleo", "Wins": 10},
+		{"Name": "Chris", "Wins": 33}]`)
+		store := FileSystemPlayerStore{database: database}
+
+		got := store.GetPlayerScore("Chris")
+		want := 33
+
+		if got != want {
+			t.Errorf("got %d want %d", got, want)
+		}
 	})
 }
