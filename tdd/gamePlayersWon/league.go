@@ -3,12 +3,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io"
+	"os"
 )
 
 type League []Player
 
-func NewLeague(rdr io.Reader) (League, error) {
+func NewLeague(rdr *os.File) (League, error) {
 	var league []Player
 	err := json.NewDecoder(rdr).Decode(&league)
 	if err != nil {
