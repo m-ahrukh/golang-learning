@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 )
@@ -11,21 +12,19 @@ type FileSystemPlayerStore struct {
 	league   League
 }
 
-func NewFileSystemPlayerStore(database *os.File) *FileSystemPlayerStore {
+func NewFileSystemPlayerStore(database *os.File) (*FileSystemPlayerStore, error) {
 	database.Seek(0, io.SeekStart)
-	league, _ := NewLeague(database)
+	league, err := NewLeague(database)
+	if err != nil {
+		return nil, fmt.Errorf("problem loading player store from file %s, %v", database.Name(), err)
+	}
 	return &FileSystemPlayerStore{
 		database: json.NewEncoder(&tape{database}),
 		league:   league,
-	}
+	}, nil
 }
 
 func (f *FileSystemPlayerStore) GetLeague() League {
-
-	// f.database.Seek(0, io.SeekStart)
-	// league, _ := NewLeague(f.database)
-	// return league
-
 	return f.league
 }
 
@@ -41,8 +40,6 @@ func (f *FileSystemPlayerStore) GetPlayerScore(name string) int {
 }
 
 func (f *FileSystemPlayerStore) RecordWin(name string) {
-	// league := f.GetLeague()
-	// player := league.Find(name)
 
 	player := f.league.Find(name)
 
@@ -52,7 +49,5 @@ func (f *FileSystemPlayerStore) RecordWin(name string) {
 		f.league = append(f.league, Player{name, 1})
 	}
 
-	// f.database.Seek(0, io.SeekStart)
-	// json.NewEncoder(f.database).Encode(f.league)
 	f.database.Encode(f.league)
 }

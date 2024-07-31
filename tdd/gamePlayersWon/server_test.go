@@ -144,30 +144,16 @@ func TestLeague(t *testing.T) {
 		store := StubPlayerStore{nil, nil, wantedLeague}
 		server := NewPlayerServer(&store)
 
-		// request, _ := http.NewRequest(http.MethodGet, "/league", nil)
 		request := newLeagueRequest()
 		response := httptest.NewRecorder()
 
 		server.ServeHTTP(response, request)
 
-		// var got []Player
 		got := getLeagueFromResponse(t, response.Body)
-
-		// err := json.NewDecoder(response.Body).Decode(&got)
-
-		// if err != nil {
-		// 	t.Fatalf("Unable to parse response from server %q into '%v'", response.Body, err)
-		// }
 
 		assertStatus(t, response.Code, http.StatusOK)
 		assertLeague(t, got, wantedLeague)
-
-		// if response.Result().Header.Get("content-type") != "application/json" {
-		// 	t.Errorf("response did not have content-type of application/json, got %v", response.Result().Header)
-		// }
-
 		assertContentType(t, response, jsonContentType)
-		// assert.Equal(t, response.Code, http.StatusOK)
 	})
 }
 
