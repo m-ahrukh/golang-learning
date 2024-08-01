@@ -18,9 +18,6 @@ func NewCLI(store PlayerStore, in io.Reader) *CLI {
 	}
 }
 func (cli *CLI) PlayPoker() {
-	// reader := bufio.NewScanner(cli.in)
-	// reader.Scan()
-	// cli.playerStore.RecordWin(extractWinner(reader.Text()))
 	userInput := cli.readLine()
 	cli.playerStore.RecordWin(extractWinner(userInput))
 }
