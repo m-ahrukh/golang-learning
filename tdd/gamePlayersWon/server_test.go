@@ -166,7 +166,7 @@ func assertContentType(t testing.TB, response *httptest.ResponseRecorder, want s
 func assertLeague(t *testing.T, got, want []Player) {
 	t.Helper()
 	if !reflect.DeepEqual(got, want) {
-		t.Errorf("got %v, want %v", got, want)
+		t.Errorf("\ngot %v, \nwant %v", got, want)
 	}
 }
 
