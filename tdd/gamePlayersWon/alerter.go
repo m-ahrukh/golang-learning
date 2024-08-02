@@ -2,22 +2,21 @@ package poker
 
 import (
 	"fmt"
+	"os"
 	"time"
 )
 
-type ScheduledAlerter struct {
-	at     time.Duration
-	amount int
+type BlindAlerter interface {
+	ScheduleAlertAt(duration time.Duration, amount int)
 }
 
-func (s ScheduledAlerter) String() string {
-	return fmt.Sprintf("%d chis at %v", s.amount, s.at)
-}
+type BlindAlerterFunc func(duration time.Duration, amount int)
 
-type SpyBlindAlerter struct {
-	Alerts []ScheduledAlerter
+func (a BlindAlerterFunc) ScheduleAlertAt(duration time.Duration, amount int) {
+	a(duration, amount)
 }
-
-func (s *SpyBlindAlerter) ScheduleAlertAt(at time.Duration, amount int) {
-	s.Alerts = append(s.Alerts, ScheduledAlerter{at, amount})
+func StdOutAlerter(duration time.Duration, amount int) {
+	time.AfterFunc(duration, func() {
+		fmt.Fprintf(os.Stdout, "Blind is now %d\n", amount)
+	})
 }
