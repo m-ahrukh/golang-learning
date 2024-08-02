@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"reflect"
 	"testing"
+	"time"
 )
 
 type StubPlayerStore struct {
@@ -26,6 +27,11 @@ func (s *StubPlayerStore) GetLeague() League {
 
 func (s *StubPlayerStore) RecordWin(name string) {
 	s.winCalls = append(s.winCalls, name)
+}
+
+type ScheduledAlert struct {
+	At     time.Duration
+	Amount int
 }
 
 func AssertPlayerWin(t testing.TB, store *StubPlayerStore, winner string) {
