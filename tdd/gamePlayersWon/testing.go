@@ -1,12 +1,7 @@
 package poker
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
-	"net/http/httptest"
-	"reflect"
 	"testing"
 	"time"
 )
@@ -29,11 +24,6 @@ func (s *StubPlayerStore) RecordWin(name string) {
 	s.winCalls = append(s.winCalls, name)
 }
 
-type ScheduledAlert struct {
-	At     time.Duration
-	Amount int
-}
-
 func AssertPlayerWin(t testing.TB, store *StubPlayerStore, winner string) {
 	t.Helper()
 	if len(store.winCalls) != 1 {
@@ -44,69 +34,19 @@ func AssertPlayerWin(t testing.TB, store *StubPlayerStore, winner string) {
 	}
 }
 
-func AssertScoreEquals(t testing.TB, got, want int) {
-	t.Helper()
-	if got != want {
-		t.Errorf("got %d want %d", got, want)
-	}
+type ScheduledAlert struct {
+	At     time.Duration
+	Amount int
 }
 
-func AssertNoError(t testing.TB, err error) {
-	t.Helper()
-	if err != nil {
-		t.Fatalf("didn't except an error but got one, %v", err)
-	}
+func (s ScheduledAlert) String() string {
+	return fmt.Sprintf("%d chips at %v", s.Amount, s.At)
 }
 
-func AssertContentType(t testing.TB, response *httptest.ResponseRecorder, want string) {
-	t.Helper()
-	if response.Result().Header.Get("content-type") != want {
-		t.Errorf("response did not have content-type of %s, got %v", want, response.Result().Header)
-	}
-}
-func AssertLeague(t *testing.T, got, want []Player) {
-	t.Helper()
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("\ngot %v, \nwant %v", got, want)
-	}
+type SpyBlindAlerter struct {
+	Alerts []ScheduledAlert
 }
 
-func GetLeagueFromResponse(t *testing.T, body io.Reader) (league []Player) {
-	t.Helper()
-	err := json.NewDecoder(body).Decode(&league)
-
-	if err != nil {
-		t.Fatalf("Unable to parse response from srver %q into slice f Player, '%v'", body, err)
-	}
-
-	return
-}
-
-func NewLeagueRequest() *http.Request {
-	req, _ := http.NewRequest(http.MethodGet, "/league", nil)
-	return req
-}
-
-func NewPostWinsRequest(name string) *http.Request {
-	req, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("/players/%s", name), nil)
-	return req
-}
-
-func NewGetScoreRequest(name string) *http.Request {
-	req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("/players/%s", name), nil)
-	return req
-}
-
-func AssertStatus(t testing.TB, got, want int) {
-	t.Helper()
-	if got != want {
-		t.Errorf("did not get correct status, got %d, want %d", got, want)
-	}
-}
-
-func AssertResponseBody(t testing.TB, got, want string) {
-	t.Helper()
-	if got != want {
-		t.Errorf("response body is wrong, got %q want %q", got, want)
-	}
+func (s *SpyBlindAlerter) ScheduleAlertAt(at time.Duration, amount int) {
+	s.Alerts = append(s.Alerts, ScheduledAlert{at, amount})
 }

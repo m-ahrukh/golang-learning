@@ -6,60 +6,28 @@ import (
 	"io"
 	"strconv"
 	"strings"
-	"time"
 )
 
-type Game interface {
-	Start(numberOfPlayers int)
-	Finish(winner string)
-}
-
-type TexasHoldem struct {
-	alerter BlindAlerter
-	store   PlayerStore
-}
-
-func NewGame(alerter BlindAlerter, store PlayerStore) *TexasHoldem {
-	return &TexasHoldem{
-		alerter: alerter,
-		store:   store,
-	}
-}
-
-func (p *TexasHoldem) Start(numberOfPlayers int) {
-	blindIncrement := time.Duration(5+numberOfPlayers) * time.Minute
-
-	blinds := []int{100, 200, 300, 400, 500, 600, 800, 1000, 2000, 4000, 8000}
-	blindTime := 0 * time.Second
-	for _, blind := range blinds {
-		p.alerter.ScheduleAlertAt(blindTime, blind)
-		blindTime = blindTime + blindIncrement
-	}
-}
-
-func (p *TexasHoldem) Finish(winner string) {
-	p.store.RecordWin(winner)
-}
-
 type CLI struct {
-	// playerStore PlayerStore
-	in  *bufio.Scanner
-	out io.Writer
-	// alerter     BlindAlerter
-	game Game
+	playerStore PlayerStore
+	in          *bufio.Scanner
+	out         io.Writer
+	game        Game
 }
 
 func NewCLI(in io.Reader, out io.Writer, game Game) *CLI {
 	return &CLI{
-		// playerStore: store,
 		in:   bufio.NewScanner(in),
 		out:  out,
 		game: game,
-		// alerter:     alerter,
 	}
 }
 
-const PlayerPrompt = "Please enter the number of payers: "
+const (
+	PlayerPrompt         = "Please enter the number of payers: "
+	BadPlayerInputErrMsg = "you are so silly"
+	BadWinnerInputMsg    = "invalid winner input, expect format of 'PlayerName wins'"
+)
 
 func (cli *CLI) PlayPoker() {
 	fmt.Fprint(cli.out, PlayerPrompt)
