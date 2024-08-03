@@ -9,10 +9,9 @@ import (
 )
 
 type CLI struct {
-	playerStore PlayerStore
-	in          *bufio.Scanner
-	out         io.Writer
-	game        Game
+	in   *bufio.Scanner
+	out  io.Writer
+	game Game
 }
 
 func NewCLI(in io.Reader, out io.Writer, game Game) *CLI {
