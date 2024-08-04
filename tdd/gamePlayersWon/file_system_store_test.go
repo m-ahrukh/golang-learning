@@ -1,8 +1,10 @@
-package poker
+package poker_test
 
 import (
 	"os"
 	"testing"
+
+	poker "goLangLearning/tdd/gamePlayersWon"
 )
 
 func TestFlieSystemStore(t *testing.T) {
@@ -12,12 +14,12 @@ func TestFlieSystemStore(t *testing.T) {
 			{"Name": "Chris", "Wins": 33}]`)
 		defer cleanDatabase()
 
-		store, err := NewFileSystemPlayerStore(database)
+		store, err := poker.NewFileSystemPlayerStore(database)
 
 		assertNoError(t, err)
 
 		got := store.GetLeague()
-		want := []Player{
+		want := []poker.Player{
 			{"Chris", 33},
 			{"Cleo", 10},
 		}
@@ -34,7 +36,7 @@ func TestFlieSystemStore(t *testing.T) {
 		{"Name": "Chris", "Wins": 33}]`)
 		defer cleanDatabase()
 
-		store, err := NewFileSystemPlayerStore(database)
+		store, err := poker.NewFileSystemPlayerStore(database)
 
 		assertNoError(t, err)
 
@@ -50,7 +52,7 @@ func TestFlieSystemStore(t *testing.T) {
 		{"Name": "Chris", "Wins": 33}]`)
 		defer cleanDatabase()
 
-		store, err := NewFileSystemPlayerStore(database)
+		store, err := poker.NewFileSystemPlayerStore(database)
 
 		assertNoError(t, err)
 
@@ -67,7 +69,7 @@ func TestFlieSystemStore(t *testing.T) {
 		{"Name": "Chris", "Wins": 33}]`)
 		defer cleanDatabase()
 
-		store, err := NewFileSystemPlayerStore(database)
+		store, err := poker.NewFileSystemPlayerStore(database)
 
 		assertNoError(t, err)
 
@@ -82,31 +84,9 @@ func TestFlieSystemStore(t *testing.T) {
 		database, cleanDatabase := createTempFile(t, "")
 		defer cleanDatabase()
 
-		_, err := NewFileSystemPlayerStore(database)
+		_, err := poker.NewFileSystemPlayerStore(database)
 		assertNoError(t, err)
 	})
-
-	// t.Run("league sorted", func(t *testing.T) {
-	// 	database, cleanDatabase := createTempFile(t, `[
-	// 		{"Name": "Cleo", "Wins": 10},
-	// 		{"Name": "Chris", "Wins": 33}]`)
-	// 	defer cleanDatabase()
-
-	// 	store, err := NewFileSystemPlayerStore(database)
-
-	// 	assertNoError(t, err)
-
-	// 	got := store.GetLeague()
-
-	// 	want := League{
-	// 		{"Chris", 33},
-	// 		{"Cleo", 10},
-	// 	}
-
-	// 	assertLeague(t, got, want)
-	// 	got = store.GetLeague()
-	// 	assertLeague(t, got, want)
-	// })
 }
 
 func createTempFile(t testing.TB, initialData string) (*os.File, func()) {

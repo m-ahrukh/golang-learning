@@ -17,7 +17,7 @@ func main() {
 	}
 	defer close()
 
-	game := poker.NewTexesHoldem(poker.BlindAlerterFunc(poker.StdOutAlerter), store)
+	game := poker.NewTexesHoldem(poker.BlindAlerterFunc(poker.Alerter), store)
 	cli := poker.NewCLI(os.Stdin, os.Stdout, game)
 
 	fmt.Println("Let's play poker")
