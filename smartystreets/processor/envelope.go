@@ -7,6 +7,9 @@ type Envelope struct {
 
 type AddressInput struct {
 	Street1 string
+	City    string
+	State   string
+	ZIPCode string
 }
 
 type AddressOutput struct {

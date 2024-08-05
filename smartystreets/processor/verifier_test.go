@@ -18,9 +18,9 @@ type VerifierFixture struct {
 	verifier *SmartyVerifier
 }
 
-func (this *VerifierFixture) Setup() {
-	this.client = &FakeHTTPClient{}
-	this.verifier = NewSmartyVerifier(this.client)
+func (verifierFixture *VerifierFixture) Setup() {
+	verifierFixture.client = &FakeHTTPClient{}
+	verifierFixture.verifier = NewSmartyVerifier(verifierFixture.client)
 }
 
 func NewSmartyVerifier(client HTTPClient) *SmartyVerifier {
@@ -29,18 +29,33 @@ func NewSmartyVerifier(client HTTPClient) *SmartyVerifier {
 	}
 }
 
-func (this *VerifierFixture) TestRequestComposedProperly() {
+func (verifierFixture *VerifierFixture) TestRequestComposedProperly() {
 	input := AddressInput{
 		Street1: "Street1",
+		City:    "City",
+		State:   "State",
+		ZIPCode: "ZIPCode",
 	}
 
-	this.verifier.Verify(input)
-	this.AssertEqual("GET", this.client.request.Method)
-	this.AssertEqual("/street-address?street=Street1", this.client.request.URL.String())
+	verifierFixture.verifier.Verify(input)
+	verifierFixture.AssertEqual("GET", verifierFixture.client.request.Method)
+	verifierFixture.AssertEqual("/street-address", verifierFixture.client.request.URL.Path)
+	verifierFixture.AssertQueryStringValue("street", "Street1")
+	verifierFixture.AssertQueryStringValue("city", "City")
+	verifierFixture.AssertQueryStringValue("state", "State")
+	verifierFixture.AssertQueryStringValue("zipcode", "ZIPCode")
+	// this.AssertEqual("/street-address?street=Street1&city=City", this.client.request.URL.String())
+
 }
 
-func (this *VerifierFixture) rawQuery() string {
-	return this.client.request.URL.RawQuery
+func (verifierFixture *VerifierFixture) AssertQueryStringValue(key, expected string) {
+	query := verifierFixture.client.request.URL.Query()
+
+	verifierFixture.AssertEqual(expected, query.Get(key))
+}
+
+func (verifierFixture *VerifierFixture) rawQuery() string {
+	return verifierFixture.client.request.URL.RawQuery
 }
 
 // ///////////////////////////////////////////////////////
