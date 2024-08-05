@@ -28,7 +28,11 @@ func (handlerFixture *HandlerFixture) Setup() {
 }
 func (handlerFixture *HandlerFixture) TestVeriferRecievesInput() {
 
-	envelope := &Envelope{}
+	envelope := &Envelope{
+		Input: AddressInput{
+			Street1: "42",
+		},
+	}
 	handlerFixture.input <- envelope
 	close(handlerFixture.input)
 
