@@ -13,39 +13,40 @@ func TestHandlerFixture(t *testing.T) {
 type HandlerFixture struct {
 	*gunit.Fixture
 
-	input       chan interface{}
-	output      chan interface{}
+	input       chan *Envelope
+	output      chan *Envelope
 	application *FakeVerifier
 	handler     *VerifyHander
 }
 
 func (handlerFixture *HandlerFixture) Setup() {
-	handlerFixture.input = make(chan interface{}, 10)
-	handlerFixture.output = make(chan interface{}, 10)
+	handlerFixture.input = make(chan *Envelope, 10)
+	handlerFixture.output = make(chan *Envelope, 10)
 	handlerFixture.application = NewFakeVerifier()
 	handlerFixture.handler = NewVerifyHandler(handlerFixture.input, handlerFixture.output, handlerFixture.application)
 
 }
 func (handlerFixture *HandlerFixture) TestVeriferRecievesInput() {
 
-	handlerFixture.input <- 42
+	envelope := &Envelope{}
+	handlerFixture.input <- envelope
 	close(handlerFixture.input)
 
 	handlerFixture.handler.Handle()
 
-	handlerFixture.AssertEqual(42, <-handlerFixture.output)
-	handlerFixture.AssertEqual(42, handlerFixture.application.input)
+	handlerFixture.AssertEqual(envelope, <-handlerFixture.output)
+	handlerFixture.AssertEqual(envelope, handlerFixture.application.input)
 }
 
 // ////////////////////////////////////////////////////////
 type FakeVerifier struct {
-	input interface{}
+	input *Envelope
 }
 
 func NewFakeVerifier() *FakeVerifier {
 	return &FakeVerifier{}
 }
 
-func (fakeVarifier *FakeVerifier) Verify(value interface{}) {
+func (fakeVarifier *FakeVerifier) Verify(value *Envelope) {
 	fakeVarifier.input = value
 }
