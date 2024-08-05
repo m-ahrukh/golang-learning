@@ -52,6 +52,9 @@ func (handlerFixture *HandlerFixture) TestInputQueueDrained() {
 	envelope1 := handlerFixture.enqueueEnvelope("41")
 	envelope2 := handlerFixture.enqueueEnvelope("42")
 	envelope3 := handlerFixture.enqueueEnvelope("43")
+	//read from the channel until the channel is closed.
+	//if we do not close the channel, it will cause the
+	//deadlock that says all go routines are asleep
 	close(handlerFixture.input)
 
 	handlerFixture.handler.Handle()
