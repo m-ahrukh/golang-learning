@@ -36,7 +36,7 @@ func (this *VerifierFixture) TestRequestComposedProperly() {
 
 	this.verifier.Verify(input)
 	this.AssertEqual("GET", this.client.request.Method)
-	this.AssertEqual("street=Street1", this.rawQuery())
+	this.AssertEqual("/street-address?street=Street1", this.client.request.URL.String())
 }
 
 func (this *VerifierFixture) rawQuery() string {
