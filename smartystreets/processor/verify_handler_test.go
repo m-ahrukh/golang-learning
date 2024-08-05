@@ -16,6 +16,7 @@ type HandlerFixture struct {
 	input       chan *Envelope
 	output      chan *Envelope
 	application *FakeVerifier
+	envelope    *Envelope
 	handler     *VerifyHander
 }
 
@@ -27,23 +28,21 @@ func (handlerFixture *HandlerFixture) Setup() {
 
 }
 func (handlerFixture *HandlerFixture) TestVeriferRecievesInput() {
-	envelope := &Envelope{
-		Input: AddressInput{
-			Street1: "42",
-		},
-	}
-	handlerFixture.application.output = AddressOutput{
-		DeliveryLine1: "DeliveryLine1",
-	}
+	handlerFixture.application.output = AddressOutput{DeliveryLine1: "DeliveryLine1"}
+	handlerFixture.enqueueEnvelope()
 
-	handlerFixture.input <- envelope
-	close(handlerFixture.input)
+	// close(handlerFixture.input)
 
 	handlerFixture.handler.Handle()
 
-	handlerFixture.AssertEqual(envelope, <-handlerFixture.output)
+	handlerFixture.AssertEqual(handlerFixture.envelope, <-handlerFixture.output)
 	handlerFixture.AssertEqual("42", handlerFixture.application.input.Street1)
-	handlerFixture.AssertEqual("DeliveryLine1", envelope.Output.DeliveryLine1)
+	handlerFixture.AssertEqual("DeliveryLine1", handlerFixture.envelope.Output.DeliveryLine1)
+}
+
+func (handlerFixture *HandlerFixture) enqueueEnvelope() {
+	handlerFixture.envelope = &Envelope{Input: AddressInput{Street1: "42"}}
+	handlerFixture.input <- handlerFixture.envelope
 }
 
 // ////////////////////////////////////////////////////////

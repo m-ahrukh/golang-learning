@@ -21,8 +21,7 @@ func NewVerifyHandler(in, out chan *Envelope, application Verifier) *VerifyHande
 func (verifier *VerifyHander) Handle() {
 	envelope := <-verifier.in
 
-	result := verifier.application.Verify(envelope.Input)
-	envelope.Output = result
+	envelope.Output = verifier.application.Verify(envelope.Input)
 
 	verifier.out <- envelope
 }
