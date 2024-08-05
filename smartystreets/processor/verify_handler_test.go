@@ -27,30 +27,36 @@ func (handlerFixture *HandlerFixture) Setup() {
 
 }
 func (handlerFixture *HandlerFixture) TestVeriferRecievesInput() {
-
 	envelope := &Envelope{
 		Input: AddressInput{
 			Street1: "42",
 		},
 	}
+	handlerFixture.application.output = AddressOutput{
+		DeliveryLine1: "DeliveryLine1",
+	}
+
 	handlerFixture.input <- envelope
 	close(handlerFixture.input)
 
 	handlerFixture.handler.Handle()
 
 	handlerFixture.AssertEqual(envelope, <-handlerFixture.output)
-	handlerFixture.AssertEqual(envelope.Input, handlerFixture.application.input)
+	handlerFixture.AssertEqual("42", handlerFixture.application.input.Street1)
+	handlerFixture.AssertEqual("DeliveryLine1", envelope.Output.DeliveryLine1)
 }
 
 // ////////////////////////////////////////////////////////
 type FakeVerifier struct {
-	input AddressInput
+	input  AddressInput
+	output AddressOutput
 }
 
 func NewFakeVerifier() *FakeVerifier {
 	return &FakeVerifier{}
 }
 
-func (fakeVarifier *FakeVerifier) Verify(value AddressInput) {
+func (fakeVarifier *FakeVerifier) Verify(value AddressInput) AddressOutput {
 	fakeVarifier.input = value
+	return fakeVarifier.output
 }
