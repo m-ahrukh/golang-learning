@@ -1,6 +1,7 @@
 package processor
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/smarty/gunit"
@@ -16,7 +17,6 @@ type HandlerFixture struct {
 	input       chan *Envelope
 	output      chan *Envelope
 	application *FakeVerifier
-	envelope    *Envelope
 	handler     *VerifyHander
 }
 
@@ -28,21 +28,37 @@ func (handlerFixture *HandlerFixture) Setup() {
 
 }
 func (handlerFixture *HandlerFixture) TestVeriferRecievesInput() {
-	handlerFixture.application.output = AddressOutput{DeliveryLine1: "DeliveryLine1"}
-	handlerFixture.enqueueEnvelope()
-
-	// close(handlerFixture.input)
+	envelope := handlerFixture.enqueueEnvelope("street")
+	close(handlerFixture.input)
 
 	handlerFixture.handler.Handle()
 
-	handlerFixture.AssertEqual(handlerFixture.envelope, <-handlerFixture.output)
-	handlerFixture.AssertEqual("42", handlerFixture.application.input.Street1)
-	handlerFixture.AssertEqual("DeliveryLine1", handlerFixture.envelope.Output.DeliveryLine1)
+	handlerFixture.AssertEqual("STREET", envelope.Output.DeliveryLine1)
+	handlerFixture.AssertEqual(envelope, <-handlerFixture.output)
 }
 
-func (handlerFixture *HandlerFixture) enqueueEnvelope() {
-	handlerFixture.envelope = &Envelope{Input: AddressInput{Street1: "42"}}
-	handlerFixture.input <- handlerFixture.envelope
+func (handlerFixture *HandlerFixture) enqueueEnvelope(street1 string) *Envelope {
+	envelope := &Envelope{
+		Input: AddressInput{
+			Street1: street1,
+		},
+	}
+	handlerFixture.input <- envelope
+
+	return envelope
+}
+
+func (handlerFixture *HandlerFixture) TestInputQueueDrained() {
+	envelope1 := handlerFixture.enqueueEnvelope("41")
+	envelope2 := handlerFixture.enqueueEnvelope("42")
+	envelope3 := handlerFixture.enqueueEnvelope("43")
+	close(handlerFixture.input)
+
+	handlerFixture.handler.Handle()
+
+	handlerFixture.AssertEqual(envelope1, <-handlerFixture.output)
+	handlerFixture.AssertEqual(envelope2, <-handlerFixture.output)
+	handlerFixture.AssertEqual(envelope3, <-handlerFixture.output)
 }
 
 // ////////////////////////////////////////////////////////
@@ -57,5 +73,5 @@ func NewFakeVerifier() *FakeVerifier {
 
 func (fakeVarifier *FakeVerifier) Verify(value AddressInput) AddressOutput {
 	fakeVarifier.input = value
-	return fakeVarifier.output
+	return AddressOutput{DeliveryLine1: strings.ToUpper(value.Street1)}
 }
