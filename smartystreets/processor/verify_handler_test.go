@@ -1,24 +1,40 @@
 package processor
 
-import "testing"
+import (
+	"testing"
 
-func TestVeriferRecievesInput(t *testing.T) {
-	handler, out := setup()
+	"github.com/smarty/gunit"
+)
 
-	handler.Listen()
-
-	recieved := <-out
-	if recieved != 1 {
-		t.Errorf("\nGot %v\nwant: 1", recieved)
-	}
+func TestHandlerFixture(t *testing.T) {
+	gunit.Run(new(HandlerFixture), t)
 }
 
-func setup() (handler *VerifyHander, out chan interface{}) {
-	in := make(chan interface{}, 10)
-	out = make(chan interface{}, 10)
-	verifier := NewVerifyHandler(in, out)
-	in <- 1
-	close(in)
+type HandlerFixture struct {
+	*gunit.Fixture
 
-	return verifier, out
+	in      chan interface{}
+	out     chan interface{}
+	handler *VerifyHander
+}
+
+func (handlerFixture *HandlerFixture) Setup() {
+	handlerFixture.in = make(chan interface{}, 10)
+	handlerFixture.out = make(chan interface{}, 10)
+	handlerFixture.handler = NewVerifyHandler(handlerFixture.in, handlerFixture.out)
+
+}
+func (handlerFixture *HandlerFixture) TestVeriferRecievesInput() {
+
+	handlerFixture.in <- 1
+	close(handlerFixture.in)
+
+	handlerFixture.handler.Listen()
+
+	// recieved := <-handlerFixture.out
+	// if recieved != 1 {
+	// 	handlerFixture.Errorf("\nGot %v\nwant: 1", recieved)
+	// }
+
+	handlerFixture.AssertEqual(1, <-handlerFixture.out)
 }

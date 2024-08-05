@@ -13,6 +13,6 @@ func NewVerifyHandler(in, out chan interface{}) *VerifyHander {
 }
 
 func (verifier *VerifyHander) Listen() {
-	verifier.out <- 1
+	verifier.out <- 9
 
 }
