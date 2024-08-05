@@ -15,7 +15,7 @@ func NewVerifier(in, out chan interface{}) *Verifier {
 }
 
 func (verifier *Verifier) Listen() {
-	verifier.out <- 0
+	verifier.out <- 1
 
 }
 
