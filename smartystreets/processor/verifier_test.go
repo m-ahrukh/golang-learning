@@ -1,6 +1,8 @@
 package processor
 
 import (
+	"bytes"
+	"io/ioutil"
 	"net/http"
 	"testing"
 
@@ -67,12 +69,40 @@ func (verifierFixture *VerifierFixture) rawQuery() string {
 	return verifierFixture.client.request.URL.RawQuery
 }
 
+func (this *VerifierFixture) TestResponseParsed() {
+	this.client.response = &http.Response{
+		Body:       ioutil.NopCloser(bytes.NewBufferString(`[{""}]`)),
+		StatusCode: http.StatusOK,
+	}
+	result := this.verifier.Verify(AddressInput{})
+	this.So(result.DeliveryLine1, should.Equal, "Hello World!")
+}
+
 // ///////////////////////////////////////////////////////
 type FakeHTTPClient struct {
-	request *http.Request
+	request  *http.Request
+	response *http.Response
+	err      error
+}
+
+//	func NewFakeHTTPClient(responseText string, statusCode int, err error) *FakeHTTPClient {
+//		return &FakeHTTPClient{
+//			response: &http.Response{
+//				Body:       ioutil.NopCloser(bytes.NewBufferString(responseText)),
+//				StatusCode: statusCode,
+//			},
+//			err: err,
+//		}
+//	}
+func (this *FakeHTTPClient) Configure(responseText string, statusCode int, err error) {
+	this.response = &http.Response{
+		Body:       ioutil.NopCloser(bytes.NewBufferString(responseText)),
+		StatusCode: statusCode,
+	}
+	this.err = err
 }
 
 func (fakeHTTPClient *FakeHTTPClient) Do(request *http.Request) (*http.Response, error) {
 	fakeHTTPClient.request = request
-	return nil, nil
+	return fakeHTTPClient.response, fakeHTTPClient.err
 }

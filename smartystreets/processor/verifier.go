@@ -23,6 +23,7 @@ func (smartyVerifier *SmartyVerifier) Verify(input AddressInput) AddressOutput {
 	query.Set("zipcode", input.ZIPCode)
 
 	request, _ := http.NewRequest("GET", "/street-address?"+query.Encode(), nil)
+
 	smartyVerifier.client.Do(request)
 
 	return AddressOutput{}
