@@ -10,3 +10,10 @@ type HTTPClient interface {
 type SmartyVerifier struct {
 	client HTTPClient
 }
+
+func (this *SmartyVerifier) Verify(AddressInput) AddressOutput {
+	request, _ := http.NewRequest("GET", "", nil)
+	this.client.Do(request)
+
+	return AddressOutput{}
+}

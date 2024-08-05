@@ -29,14 +29,26 @@ func NewSmartyVerifier(client HTTPClient) *SmartyVerifier {
 	}
 }
 
-func (this *VerifierFixture) Test() {
+func (this *VerifierFixture) TestRequestComposedProperly() {
+	input := AddressInput{
+		Street1: "Street1",
+	}
 
+	this.verifier.Verify(input)
+	this.AssertEqual("GET", this.client.request.Method)
+	this.AssertEqual("street=Street1", this.rawQuery())
+}
+
+func (this *VerifierFixture) rawQuery() string {
+	return this.client.request.URL.RawQuery
 }
 
 // ///////////////////////////////////////////////////////
 type FakeHTTPClient struct {
+	request *http.Request
 }
 
-func (this *FakeHTTPClient) Do(*http.Request) (*http.Response, error) {
+func (this *FakeHTTPClient) Do(request *http.Request) (*http.Response, error) {
+	this.request = request
 	return nil, nil
 }
