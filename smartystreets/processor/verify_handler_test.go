@@ -35,18 +35,18 @@ func (handlerFixture *HandlerFixture) TestVeriferRecievesInput() {
 	handlerFixture.handler.Handle()
 
 	handlerFixture.AssertEqual(envelope, <-handlerFixture.output)
-	handlerFixture.AssertEqual(envelope, handlerFixture.application.input)
+	handlerFixture.AssertEqual(envelope.Input, handlerFixture.application.input)
 }
 
 // ////////////////////////////////////////////////////////
 type FakeVerifier struct {
-	input *Envelope
+	input AddressInput
 }
 
 func NewFakeVerifier() *FakeVerifier {
 	return &FakeVerifier{}
 }
 
-func (fakeVarifier *FakeVerifier) Verify(value *Envelope) {
+func (fakeVarifier *FakeVerifier) Verify(value AddressInput) {
 	fakeVarifier.input = value
 }
