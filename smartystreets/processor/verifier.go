@@ -17,17 +17,12 @@ type SmartyVerifier struct {
 
 func (smartyVerifier *SmartyVerifier) Verify(input AddressInput) AddressOutput {
 
-	var request *http.Request = smartyVerifier.buildRequest(input)
-
+	request := smartyVerifier.buildRequest(input)
 	response, _ := smartyVerifier.client.Do(request)
 
-	var output []Candidate
-	/* _ := */ json.NewDecoder(response.Body).Decode(&output)
+	output := smartyVerifier.decodeResponse(response)
 
-	return AddressOutput{
-		DeliveryLine1: output[0].DeliveryLine1,
-		LastLine:      output[0].LastLine,
-	}
+	return smartyVerifier.translateCandidate(output[0])
 }
 
 func (smartyVerifier *SmartyVerifier) buildRequest(input AddressInput) *http.Request {
@@ -38,6 +33,18 @@ func (smartyVerifier *SmartyVerifier) buildRequest(input AddressInput) *http.Req
 	query.Set("zipcode", input.ZIPCode)
 	request, _ := http.NewRequest("GET", "/street-address?"+query.Encode(), nil)
 	return request
+}
+
+func (smartyVerifier *SmartyVerifier) decodeResponse(response *http.Response) (output []Candidate) {
+	/* _ := */ json.NewDecoder(response.Body).Decode(&output)
+	return output
+}
+
+func (smartyVerifier *SmartyVerifier) translateCandidate(candidate Candidate) AddressOutput {
+	return AddressOutput{
+		DeliveryLine1: candidate.DeliveryLine1,
+		LastLine:      candidate.LastLine,
+	}
 }
 
 type Candidate struct {
