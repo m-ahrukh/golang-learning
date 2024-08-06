@@ -13,6 +13,6 @@ type AddressInput struct {
 }
 
 type AddressOutput struct {
-	DeliveryLine1 string `json:"delivery_line_1"`
-	LastLine      string `json:"last_line"`
+	DeliveryLine1 string
+	LastLine      string
 }

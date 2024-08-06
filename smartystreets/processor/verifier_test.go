@@ -60,10 +60,6 @@ func (verifierFixture *VerifierFixture) AssertQueryStringValue(key, expected str
 	verifierFixture.So(query.Get(key), should.Equal, expected)
 }
 
-// func (verifierFixture *VerifierFixture) rawQuery() string {
-// 	return verifierFixture.client.request.URL.RawQuery
-// }
-
 func (verifierFixture *VerifierFixture) TestResponseParsed() {
 
 	verifierFixture.client.Configure(rawJSONOutput, http.StatusOK, nil)
