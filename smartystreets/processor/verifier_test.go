@@ -35,27 +35,22 @@ func NewSmartyVerifier(client HTTPClient) *SmartyVerifier {
 func (verifierFixture *VerifierFixture) TestRequestComposedProperly() {
 	input := AddressInput{
 		Street1: "Street1",
-		// City:    "City & City",
 		City:    "City",
 		State:   "State",
 		ZIPCode: "ZIPCode",
 	}
 
+	verifierFixture.client.Configure("[{}]", http.StatusOK, nil)
 	verifierFixture.verifier.Verify(input)
 
 	verifierFixture.So(verifierFixture.client.request.Method, should.Equal, "GET")
-	// verifierFixture.AssertEqual("GET", verifierFixture.client.request.Method)
 	verifierFixture.So(verifierFixture.client.request.URL.Path, should.Equal, "/street-address")
 
 	verifierFixture.AssertEqual("/street-address", verifierFixture.client.request.URL.Path)
-	verifierFixture.AssertQueryStringValue("street", "Street1")
-	// verifierFixture.AssertQueryStringValue("city", "City & City")
-	verifierFixture.AssertQueryStringValue("city", "City")
-	verifierFixture.AssertQueryStringValue("state", "State")
-	verifierFixture.AssertQueryStringValue("zipcode", "ZIPCode")
-	// verifierFixture.Assert(strings.Contains(verifierFixture.client.request.URL.RawQuery, "%26"))
-
-	// verifierFixture.AssertEqual("/street-address?street=Street1&city=City", this.client.request.URL.String())
+	verifierFixture.AssertQueryStringValue("street", input.Street1)
+	verifierFixture.AssertQueryStringValue("city", input.City)
+	verifierFixture.AssertQueryStringValue("state", input.State)
+	verifierFixture.AssertQueryStringValue("zipcode", input.ZIPCode)
 
 }
 
@@ -65,18 +60,26 @@ func (verifierFixture *VerifierFixture) AssertQueryStringValue(key, expected str
 	verifierFixture.So(query.Get(key), should.Equal, expected)
 }
 
-func (verifierFixture *VerifierFixture) rawQuery() string {
-	return verifierFixture.client.request.URL.RawQuery
+// func (verifierFixture *VerifierFixture) rawQuery() string {
+// 	return verifierFixture.client.request.URL.RawQuery
+// }
+
+func (verifierFixture *VerifierFixture) TestResponseParsed() {
+
+	verifierFixture.client.Configure(rawJSONOutput, http.StatusOK, nil)
+	result := verifierFixture.verifier.Verify(AddressInput{})
+
+	verifierFixture.So(result.DeliveryLine1, should.Equal, "1 Santa Claus Ln")
+	verifierFixture.So(result.LastLine, should.Equal, "North Pole AK 99705-9901")
 }
 
-func (this *VerifierFixture) TestResponseParsed() {
-	this.client.response = &http.Response{
-		Body:       ioutil.NopCloser(bytes.NewBufferString(`[{""}]`)),
-		StatusCode: http.StatusOK,
+const rawJSONOutput = `
+[
+	{
+		"delivery_line_1": "1 Santa Claus Ln",
+		"last_line": "North Pole AK 99705-9901"
 	}
-	result := this.verifier.Verify(AddressInput{})
-	this.So(result.DeliveryLine1, should.Equal, "Hello World!")
-}
+]`
 
 // ///////////////////////////////////////////////////////
 type FakeHTTPClient struct {
@@ -85,21 +88,12 @@ type FakeHTTPClient struct {
 	err      error
 }
 
-//	func NewFakeHTTPClient(responseText string, statusCode int, err error) *FakeHTTPClient {
-//		return &FakeHTTPClient{
-//			response: &http.Response{
-//				Body:       ioutil.NopCloser(bytes.NewBufferString(responseText)),
-//				StatusCode: statusCode,
-//			},
-//			err: err,
-//		}
-//	}
-func (this *FakeHTTPClient) Configure(responseText string, statusCode int, err error) {
-	this.response = &http.Response{
+func (fakeHTTPClient *FakeHTTPClient) Configure(responseText string, statusCode int, err error) {
+	fakeHTTPClient.response = &http.Response{
 		Body:       ioutil.NopCloser(bytes.NewBufferString(responseText)),
 		StatusCode: statusCode,
 	}
-	this.err = err
+	fakeHTTPClient.err = err
 }
 
 func (fakeHTTPClient *FakeHTTPClient) Do(request *http.Request) (*http.Response, error) {
