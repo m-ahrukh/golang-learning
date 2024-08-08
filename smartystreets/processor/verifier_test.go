@@ -3,7 +3,6 @@ package processor
 import (
 	"bytes"
 	"errors"
-	"io/ioutil"
 	"net/http"
 	"testing"
 
@@ -100,17 +99,27 @@ func (verifierFixture *VerifierFixture) TestHTTPErrorHandler() {
 	verifierFixture.So(result.Status, should.Equal, "Invalid API Response")
 }
 
+func (verifierFixture *VerifierFixture) TestHTTPResponseBodyClosed() {
+	verifierFixture.client.Configure(rawJSONOutput, http.StatusOK, nil)
+	verifierFixture.verifier.Verify(AddressInput{})
+
+	verifierFixture.So(verifierFixture.client.responseBody.closed, should.Equal, 1)
+
+}
+
 // ///////////////////////////////////////////////////////
 type FakeHTTPClient struct {
-	request  *http.Request
-	response *http.Response
-	err      error
+	request      *http.Request
+	response     *http.Response
+	responseBody *SpyBuffer
+	err          error
 }
 
 func (fakeHTTPClient *FakeHTTPClient) Configure(responseText string, statusCode int, err error) {
 	if err == nil {
+		fakeHTTPClient.responseBody = NewSpyBuffer(responseText)
 		fakeHTTPClient.response = &http.Response{
-			Body:       ioutil.NopCloser(bytes.NewBufferString(responseText)),
+			Body:       fakeHTTPClient.responseBody,
 			StatusCode: statusCode,
 		}
 	}
@@ -120,4 +129,22 @@ func (fakeHTTPClient *FakeHTTPClient) Configure(responseText string, statusCode 
 func (fakeHTTPClient *FakeHTTPClient) Do(request *http.Request) (*http.Response, error) {
 	fakeHTTPClient.request = request
 	return fakeHTTPClient.response, fakeHTTPClient.err
+}
+
+// ///////////////////////////////////////////////////////
+type SpyBuffer struct {
+	*bytes.Buffer
+	closed int
+}
+
+func NewSpyBuffer(value string) *SpyBuffer {
+	return &SpyBuffer{
+		Buffer: bytes.NewBufferString(value),
+	}
+}
+
+func (spyBuffer *SpyBuffer) Close() error {
+	spyBuffer.closed++
+	spyBuffer.Buffer.Reset()
+	return nil
 }

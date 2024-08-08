@@ -37,6 +37,7 @@ func (smartyVerifier *SmartyVerifier) buildRequest(input AddressInput) *http.Req
 
 func (smartyVerifier *SmartyVerifier) decodeResponse(response *http.Response) (output []Candidate) {
 	if response != nil {
+		defer response.Body.Close()
 		json.NewDecoder(response.Body).Decode(&output)
 	}
 	return output
