@@ -20,7 +20,10 @@ func (smartyVerifier *SmartyVerifier) Verify(input AddressInput) AddressOutput {
 	request := smartyVerifier.buildRequest(input)
 	response, _ := smartyVerifier.client.Do(request)
 
-	output := smartyVerifier.decodeResponse(response)
+	output, err := smartyVerifier.decodeResponse(response)
+	if err != nil {
+		return AddressOutput{Status: "Invalid API Response JSON"}
+	}
 
 	return smartyVerifier.translateCandidate(output[0])
 }
@@ -35,19 +38,31 @@ func (smartyVerifier *SmartyVerifier) buildRequest(input AddressInput) *http.Req
 	return request
 }
 
-func (smartyVerifier *SmartyVerifier) decodeResponse(response *http.Response) (output []Candidate) {
-	/* _ := */ json.NewDecoder(response.Body).Decode(&output)
-	return output
+func (smartyVerifier *SmartyVerifier) decodeResponse(response *http.Response) ([]Candidate, error) {
+	var output []Candidate
+	err := json.NewDecoder(response.Body).Decode(&output)
+	// if err != nil {
+	// 	fmt.Println("-----------------err:", err)
+	// }
+	return output, err
 }
 
 func (smartyVerifier *SmartyVerifier) translateCandidate(candidate Candidate) AddressOutput {
 	return AddressOutput{
 		DeliveryLine1: candidate.DeliveryLine1,
 		LastLine:      candidate.LastLine,
+		City:          candidate.Components.City,
+		State:         candidate.Components.State,
+		ZIPCode:       candidate.Components.ZIPCode,
 	}
 }
 
 type Candidate struct {
 	DeliveryLine1 string `json:"delivery_line_1"`
 	LastLine      string `json:"last_line"`
+	Components    struct {
+		City    string `json:"city_name"`
+		State   string `json:"state_abbreviation"`
+		ZIPCode string `json:"zipcode"`
+	} `json:"components"`
 }

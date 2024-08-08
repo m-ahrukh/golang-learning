@@ -67,15 +67,31 @@ func (verifierFixture *VerifierFixture) TestResponseParsed() {
 
 	verifierFixture.So(result.DeliveryLine1, should.Equal, "1 Santa Claus Ln")
 	verifierFixture.So(result.LastLine, should.Equal, "North Pole AK 99705-9901")
+	verifierFixture.So(result.City, should.Equal, "North Pole")
+	verifierFixture.So(result.State, should.Equal, "AK")
+	verifierFixture.So(result.ZIPCode, should.Equal, "99705")
 }
 
 const rawJSONOutput = `
 [
 	{
 		"delivery_line_1": "1 Santa Claus Ln",
-		"last_line": "North Pole AK 99705-9901"
+		"last_line": "North Pole AK 99705-9901",
+		"components": {
+			"city_name": "North Pole",
+			"state_abbreviation": "AK",
+			"zipcode": "99705"
+		}
 	}
 ]`
+
+func (verifierFixture *VerifierFixture) TestMalformedJSONHandled() {
+	verifierFixture.client.Configure(malformedRawJSONOutput, http.StatusOK, nil)
+	result := verifierFixture.verifier.Verify(AddressInput{})
+	verifierFixture.So(result.Status, should.Equal, "Invalid API Response JSON")
+}
+
+const malformedRawJSONOutput = `alert('Hello, World' DROP TABLE Users)`
 
 // ///////////////////////////////////////////////////////
 type FakeHTTPClient struct {
