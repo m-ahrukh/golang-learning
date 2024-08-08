@@ -2,6 +2,7 @@ package processor
 
 import (
 	"bytes"
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"testing"
@@ -86,12 +87,18 @@ const rawJSONOutput = `
 ]`
 
 func (verifierFixture *VerifierFixture) TestMalformedJSONHandled() {
+	const malformedRawJSONOutput = `alert('Hello, World' DROP TABLE Users)`
 	verifierFixture.client.Configure(malformedRawJSONOutput, http.StatusOK, nil)
 	result := verifierFixture.verifier.Verify(AddressInput{})
-	verifierFixture.So(result.Status, should.Equal, "Invalid API Response JSON")
+	verifierFixture.So(result.Status, should.Equal, "Invalid API Response")
 }
 
-const malformedRawJSONOutput = `alert('Hello, World' DROP TABLE Users)`
+func (verifierFixture *VerifierFixture) TestHTTPErrorHandler() {
+	verifierFixture.client.Configure("", 0, errors.New("GOPHERS!"))
+
+	result := verifierFixture.verifier.Verify(AddressInput{})
+	verifierFixture.So(result.Status, should.Equal, "Invalid API Response")
+}
 
 // ///////////////////////////////////////////////////////
 type FakeHTTPClient struct {
@@ -101,9 +108,11 @@ type FakeHTTPClient struct {
 }
 
 func (fakeHTTPClient *FakeHTTPClient) Configure(responseText string, statusCode int, err error) {
-	fakeHTTPClient.response = &http.Response{
-		Body:       ioutil.NopCloser(bytes.NewBufferString(responseText)),
-		StatusCode: statusCode,
+	if err == nil {
+		fakeHTTPClient.response = &http.Response{
+			Body:       ioutil.NopCloser(bytes.NewBufferString(responseText)),
+			StatusCode: statusCode,
+		}
 	}
 	fakeHTTPClient.err = err
 }

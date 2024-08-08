@@ -20,12 +20,9 @@ func (smartyVerifier *SmartyVerifier) Verify(input AddressInput) AddressOutput {
 	request := smartyVerifier.buildRequest(input)
 	response, _ := smartyVerifier.client.Do(request)
 
-	output, err := smartyVerifier.decodeResponse(response)
-	if err != nil {
-		return AddressOutput{Status: "Invalid API Response JSON"}
-	}
+	candidates := smartyVerifier.decodeResponse(response)
 
-	return smartyVerifier.translateCandidate(output[0])
+	return smartyVerifier.preparingAddressOutput(candidates)
 }
 
 func (smartyVerifier *SmartyVerifier) buildRequest(input AddressInput) *http.Request {
@@ -38,16 +35,19 @@ func (smartyVerifier *SmartyVerifier) buildRequest(input AddressInput) *http.Req
 	return request
 }
 
-func (smartyVerifier *SmartyVerifier) decodeResponse(response *http.Response) ([]Candidate, error) {
-	var output []Candidate
-	err := json.NewDecoder(response.Body).Decode(&output)
-	// if err != nil {
-	// 	fmt.Println("-----------------err:", err)
-	// }
-	return output, err
+func (smartyVerifier *SmartyVerifier) decodeResponse(response *http.Response) (output []Candidate) {
+	if response != nil {
+		json.NewDecoder(response.Body).Decode(&output)
+	}
+	return output
 }
 
-func (smartyVerifier *SmartyVerifier) translateCandidate(candidate Candidate) AddressOutput {
+func (smartyVerifier *SmartyVerifier) preparingAddressOutput(candidates []Candidate) AddressOutput {
+	if len(candidates) == 0 {
+		return AddressOutput{Status: "Invalid API Response"}
+	}
+
+	candidate := candidates[0]
 	return AddressOutput{
 		DeliveryLine1: candidate.DeliveryLine1,
 		LastLine:      candidate.LastLine,
