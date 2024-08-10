@@ -50,19 +50,26 @@ func (smartyVerifier *SmartyVerifier) preparingAddressOutput(candidates []Candid
 
 	candidate := candidates[0]
 
-	status := ""
-	if candidate.Analysis.Match == "Y" && candidate.Analysis.Vacant == "N" && candidate.Analysis.Active == "Y" {
-		status = "Deliverable"
-	}
-
 	return AddressOutput{
-		Status:        status,
+		Status:        computeStatus(candidate),
 		DeliveryLine1: candidate.DeliveryLine1,
 		LastLine:      candidate.LastLine,
 		City:          candidate.Components.City,
 		State:         candidate.Components.State,
 		ZIPCode:       candidate.Components.ZIPCode,
 	}
+}
+
+func computeStatus(candidate Candidate) string {
+	analysis := candidate.Analysis
+	if analysis.Match == "Y" {
+		if analysis.Vacant == "N" && analysis.Active == "Y" {
+			return "Deliverable"
+		} else if analysis.Vacant == "Y" {
+			return "Vacant"
+		}
+	}
+	return ""
 }
 
 type Candidate struct {

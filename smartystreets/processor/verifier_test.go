@@ -119,10 +119,26 @@ const deliverableJSONOutput = `[
 	}
 ]`
 
-func (this *VerifierFixture) TestMailableAddressStatus() {
-	this.client.Configure(deliverableJSONOutput, http.StatusOK, nil)
-	output := this.verifier.Verify(AddressInput{})
-	this.So(output.Status, should.Equal, "Deliverable")
+func (verifierFixture *VerifierFixture) TestMailableAddressStatus() {
+	verifierFixture.client.Configure(deliverableJSONOutput, http.StatusOK, nil)
+	output := verifierFixture.verifier.Verify(AddressInput{})
+	verifierFixture.So(output.Status, should.Equal, "Deliverable")
+}
+
+const vacantJSONOutput = `[
+	{
+		"analysis": {
+			"dpv_match_code": "Y",
+			"dpv_vacant": "Y",
+			"active": "Y"
+		}
+	}
+]`
+
+func (verifierFixture *VerifierFixture) TestVaidUndeliverableAddress() {
+	verifierFixture.client.Configure(vacantJSONOutput, http.StatusOK, nil)
+	output := verifierFixture.verifier.Verify(AddressInput{})
+	verifierFixture.So(output.Status, should.Equal, "Vacant")
 }
 
 // ///////////////////////////////////////////////////////
