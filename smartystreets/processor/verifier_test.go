@@ -107,6 +107,24 @@ func (verifierFixture *VerifierFixture) TestHTTPResponseBodyClosed() {
 
 }
 
+const deliverableJSONOutput = `[
+	{
+		"delivery_line_1": "1 Santa Claus Ln",
+		"last_line": "North Pole AK 99705-9901",
+		"analysis": {
+			"dpv_match_code": "Y",
+			"dpv_vacant": "N",
+			"active": "Y"
+		}
+	}
+]`
+
+func (this *VerifierFixture) TestMailableAddressStatus() {
+	this.client.Configure(deliverableJSONOutput, http.StatusOK, nil)
+	output := this.verifier.Verify(AddressInput{})
+	this.So(output.Status, should.Equal, "Deliverable")
+}
+
 // ///////////////////////////////////////////////////////
 type FakeHTTPClient struct {
 	request      *http.Request
