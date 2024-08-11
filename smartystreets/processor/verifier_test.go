@@ -3,6 +3,7 @@ package processor
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"net/http"
 	"testing"
 
@@ -120,25 +121,45 @@ const deliverableJSONOutput = `[
 ]`
 
 func (verifierFixture *VerifierFixture) TestMailableAddressStatus() {
-	verifierFixture.client.Configure(deliverableJSONOutput, http.StatusOK, nil)
+	verifierFixture.client.Configure(buildAnalysisJSON("Y", "N", "Y"), http.StatusOK, nil)
 	output := verifierFixture.verifier.Verify(AddressInput{})
 	verifierFixture.So(output.Status, should.Equal, "Deliverable")
 }
 
-const vacantJSONOutput = `[
-	{
-		"analysis": {
-			"dpv_match_code": "Y",
-			"dpv_vacant": "Y",
-			"active": "Y"
-		}
-	}
-]`
+// const vacantJSONOutput = `[
+// 	{
+// 		"analysis": {
+// 			"dpv_match_code": "Y",
+// 			"dpv_vacant": "Y",
+// 			"active": "Y"
+// 		}
+// 	}
+// ]`
 
 func (verifierFixture *VerifierFixture) TestVaidUndeliverableAddress() {
-	verifierFixture.client.Configure(vacantJSONOutput, http.StatusOK, nil)
+	verifierFixture.client.Configure(buildAnalysisJSON("Y", "Y", "Y"), http.StatusOK, nil)
 	output := verifierFixture.verifier.Verify(AddressInput{})
 	verifierFixture.So(output.Status, should.Equal, "Vacant")
+}
+
+func (verifierFixture *VerifierFixture) TestVaidInactiveAddress() {
+	verifierFixture.client.Configure(buildAnalysisJSON("Y", "N", "N"), http.StatusOK, nil)
+	output := verifierFixture.verifier.Verify(AddressInput{})
+	verifierFixture.So(output.Status, should.Equal, "Inactive")
+}
+
+func buildAnalysisJSON(match, vacant, active string) string {
+	template := `
+	[
+		{
+			"analysis": {
+				"dpv_match_code": "%s",
+				"dpv_vacant": "%s",
+				"active": "%s"
+			}
+		}
+	]`
+	return fmt.Sprintf(template, match, vacant, active)
 }
 
 // ///////////////////////////////////////////////////////

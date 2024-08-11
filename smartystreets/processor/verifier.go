@@ -67,6 +67,8 @@ func computeStatus(candidate Candidate) string {
 			return "Deliverable"
 		} else if analysis.Vacant == "Y" {
 			return "Vacant"
+		} else if analysis.Active == "N" {
+			return "Inactive"
 		}
 	}
 	return ""
