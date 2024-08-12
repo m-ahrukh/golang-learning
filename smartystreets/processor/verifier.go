@@ -67,11 +67,11 @@ func computeStatus(candidate Candidate) string {
 			return "Deliverable"
 		} else if analysis.Vacant == "Y" {
 			return "Vacant"
-		} else if analysis.Active == "N" {
+		} else {
 			return "Inactive"
 		}
 	}
-	return ""
+	return "Invalid"
 }
 
 type Candidate struct {

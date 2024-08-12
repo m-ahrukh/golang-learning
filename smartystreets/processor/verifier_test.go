@@ -108,22 +108,30 @@ func (verifierFixture *VerifierFixture) TestHTTPResponseBodyClosed() {
 
 }
 
-const deliverableJSONOutput = `[
-	{
-		"delivery_line_1": "1 Santa Claus Ln",
-		"last_line": "North Pole AK 99705-9901",
-		"analysis": {
-			"dpv_match_code": "Y",
-			"dpv_vacant": "N",
-			"active": "Y"
-		}
-	}
-]`
+// const deliverableJSONOutput = `[
+// 	{
+// 		"delivery_line_1": "1 Santa Claus Ln",
+// 		"last_line": "North Pole AK 99705-9901",
+// 		"analysis": {
+// 			"dpv_match_code": "Y",
+// 			"dpv_vacant": "N",
+// 			"active": "Y"
+// 		}
+// 	}
+// ]`
 
-func (verifierFixture *VerifierFixture) TestMailableAddressStatus() {
-	verifierFixture.client.Configure(buildAnalysisJSON("Y", "N", "Y"), http.StatusOK, nil)
-	output := verifierFixture.verifier.Verify(AddressInput{})
-	verifierFixture.So(output.Status, should.Equal, "Deliverable")
+func (verifierFixture *VerifierFixture) TestAddressStatus() {
+	var (
+		deliverableJSON = buildAnalysisJSON("Y", "N", "Y")
+		vacantJSON      = buildAnalysisJSON("Y", "Y", "Y")
+		inactiveJSON    = buildAnalysisJSON("Y", "N", "N")
+		invalidJSON     = buildAnalysisJSON("N", "?", "?")
+	)
+
+	verifierFixture.verifyAndAssertStatus(deliverableJSON, "Deliverable")
+	verifierFixture.verifyAndAssertStatus(vacantJSON, "Vacant")
+	verifierFixture.verifyAndAssertStatus(inactiveJSON, "Inactive")
+	verifierFixture.verifyAndAssertStatus(invalidJSON, "Invalid")
 }
 
 // const vacantJSONOutput = `[
@@ -136,16 +144,10 @@ func (verifierFixture *VerifierFixture) TestMailableAddressStatus() {
 // 	}
 // ]`
 
-func (verifierFixture *VerifierFixture) TestVaidUndeliverableAddress() {
-	verifierFixture.client.Configure(buildAnalysisJSON("Y", "Y", "Y"), http.StatusOK, nil)
+func (verifierFixture *VerifierFixture) verifyAndAssertStatus(jsonResponse, expectedStatus string) {
+	verifierFixture.client.Configure(jsonResponse, http.StatusOK, nil)
 	output := verifierFixture.verifier.Verify(AddressInput{})
-	verifierFixture.So(output.Status, should.Equal, "Vacant")
-}
-
-func (verifierFixture *VerifierFixture) TestVaidInactiveAddress() {
-	verifierFixture.client.Configure(buildAnalysisJSON("Y", "N", "N"), http.StatusOK, nil)
-	output := verifierFixture.verifier.Verify(AddressInput{})
-	verifierFixture.So(output.Status, should.Equal, "Inactive")
+	verifierFixture.So(output.Status, should.Equal, expectedStatus)
 }
 
 func buildAnalysisJSON(match, vacant, active string) string {
