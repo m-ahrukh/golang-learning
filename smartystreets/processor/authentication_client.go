@@ -20,6 +20,6 @@ func (authenticationClient *AuthenticationClient) Do(request *http.Request) (*ht
 	request.URL.Scheme = authenticationClient.scheme
 	request.Host = authenticationClient.hostname
 	request.URL.Host = authenticationClient.hostname
-	authenticationClient.inner.Do(request)
-	return &http.Response{StatusCode: http.StatusTeapot}, nil
+	return authenticationClient.inner.Do(request)
+	// return &http.Response{StatusCode: http.StatusTeapot}, nil
 }

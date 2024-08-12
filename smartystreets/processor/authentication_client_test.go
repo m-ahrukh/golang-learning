@@ -1,6 +1,7 @@
 package processor
 
 import (
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -35,16 +36,14 @@ func (acf *AuthenticationClientFixture) TestHostnameAndSchemaAddedBeforeRequestI
 	acf.So(acf.inner.request.URL.Host, should.Equal, "different-company.com")
 }
 
-func (acf *AuthenticationClientFixture) TestResponseFromInnerClientReturned() {
+func (acf *AuthenticationClientFixture) TestResponseAndErrorFromInnerClientReturned() {
 	acf.inner.response = &http.Response{
-		StatusCode: http.StatusTeapot + 1,
+		StatusCode: http.StatusTeapot,
 	}
-
+	acf.inner.err = errors.New("HTTP Error")
 	request := httptest.NewRequest("GET", "/path", nil)
-	response, _ := acf.client.Do(request)
+	response, err := acf.client.Do(request)
 
-	if acf.So(response, should.NotBeNil) {
-		acf.So(response.StatusCode, should.Equal, http.StatusTeapot+1)
-	}
-
+	acf.So(response.StatusCode, should.Equal, http.StatusTeapot)
+	acf.So(err.Error(), should.Equal, "HTTP Error")
 }
