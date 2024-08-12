@@ -16,6 +16,9 @@ func NewAuthenticationClient(inner HTTPClient, scheme, hostname string) *Authent
 	}
 }
 
-func (authenticationClient *AuthenticationClient) Do(*http.Request) (*http.Response, error) {
-	panic("implement")
+func (authenticationClient *AuthenticationClient) Do(request *http.Request) (*http.Response, error) {
+	request.URL.Scheme = authenticationClient.scheme
+	request.Host = authenticationClient.hostname
+	authenticationClient.inner.Do(request)
+	return nil, nil
 }

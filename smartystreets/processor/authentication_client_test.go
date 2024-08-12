@@ -21,15 +21,14 @@ type AuthenticationClientFixture struct {
 
 func (acf *AuthenticationClientFixture) Setup() {
 	acf.inner = &FakeHTTPClient{}
-	acf.client = &AuthenticationClient{}
+	acf.client = NewAuthenticationClient(acf.inner, "http", "different-company.com")
 }
 
 func (acf *AuthenticationClientFixture) TestHostnameAndSchema() {
-	acf.client = NewAuthenticationClient(acf.inner, "us-street.api.smartystreets.com", "HOSTNAME")
 	request := httptest.NewRequest("GET", "/path", nil)
 
 	acf.client.Do(request)
 
-	acf.So(acf.inner.request.Host, should.Equal, "us-street.api.smartystreets.com")
-	acf.So(acf.inner.request.URL.Scheme, should.Equal, "https")
+	acf.So(acf.inner.request.Host, should.Equal, "different-company.com")
+	acf.So(acf.inner.request.URL.Scheme, should.Equal, "http")
 }
