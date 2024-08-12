@@ -62,16 +62,19 @@ func (smartyVerifier *SmartyVerifier) preparingAddressOutput(candidates []Candid
 
 func computeStatus(candidate Candidate) string {
 	analysis := candidate.Analysis
-	if analysis.Match == "Y" {
-		if analysis.Vacant == "N" && analysis.Active == "Y" {
-			return "Deliverable"
-		} else if analysis.Vacant == "Y" {
-			return "Vacant"
-		} else {
-			return "Inactive"
-		}
+	if !isDeliverable(analysis.Match) {
+		return "Invalid"
+	} else if analysis.Vacant == "Y" {
+		return "Vacant"
+	} else if analysis.Active != "Y" {
+		return "Inactive"
+	} else {
+		return "Deliverable"
 	}
-	return "Invalid"
+}
+
+func isDeliverable(value string) bool {
+	return value == "Y" || value == "S" || value == "D"
 }
 
 type Candidate struct {

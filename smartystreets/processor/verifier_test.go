@@ -122,13 +122,17 @@ func (verifierFixture *VerifierFixture) TestHTTPResponseBodyClosed() {
 
 func (verifierFixture *VerifierFixture) TestAddressStatus() {
 	var (
-		deliverableJSON = buildAnalysisJSON("Y", "N", "Y")
-		vacantJSON      = buildAnalysisJSON("Y", "Y", "Y")
-		inactiveJSON    = buildAnalysisJSON("Y", "N", "N")
-		invalidJSON     = buildAnalysisJSON("N", "?", "?")
+		deliverableJSON      = buildAnalysisJSON("Y", "N", "Y")
+		missingSecondaryJSON = buildAnalysisJSON("D", "N", "Y")
+		dropSecondaryJSON    = buildAnalysisJSON("S", "N", "Y")
+		vacantJSON           = buildAnalysisJSON("Y", "Y", "Y")
+		inactiveJSON         = buildAnalysisJSON("Y", "N", "N")
+		invalidJSON          = buildAnalysisJSON("N", "?", "?")
 	)
 
 	verifierFixture.verifyAndAssertStatus(deliverableJSON, "Deliverable")
+	verifierFixture.verifyAndAssertStatus(missingSecondaryJSON, "Deliverable")
+	verifierFixture.verifyAndAssertStatus(dropSecondaryJSON, "Deliverable")
 	verifierFixture.verifyAndAssertStatus(vacantJSON, "Vacant")
 	verifierFixture.verifyAndAssertStatus(inactiveJSON, "Inactive")
 	verifierFixture.verifyAndAssertStatus(invalidJSON, "Invalid")
