@@ -19,6 +19,7 @@ func NewAuthenticationClient(inner HTTPClient, scheme, hostname string) *Authent
 func (authenticationClient *AuthenticationClient) Do(request *http.Request) (*http.Response, error) {
 	request.URL.Scheme = authenticationClient.scheme
 	request.Host = authenticationClient.hostname
+	request.URL.Host = authenticationClient.hostname
 	authenticationClient.inner.Do(request)
-	return nil, nil
+	return &http.Response{StatusCode: http.StatusTeapot}, nil
 }
