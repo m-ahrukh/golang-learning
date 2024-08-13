@@ -26,32 +26,34 @@ func (shf *SequenceHandlerFixture) Setup() {
 }
 
 func (shf *SequenceHandlerFixture) TestExpectedEnvelopeSentToOutput() {
-	envelope := &Envelope{Sequence: 0}
-	shf.input <- envelope
-	close(shf.input)
+	shf.sendEnvelopesInSequence(0)
 
 	shf.handler.Handle()
 
-	shf.So(<-shf.output, should.Equal, envelope)
+	shf.So(shf.sequenceOrder(), should.Resemble, []int{0})
+	shf.So(shf.handler.buffer, should.BeEmpty)
 }
 
 func (shf *SequenceHandlerFixture) TestEnvelopesReceivedOutOfOrder_BufferedUntilContiguousBlock() {
-	shf.input <- &Envelope{Sequence: 4}
-	shf.input <- &Envelope{Sequence: 2}
-	shf.input <- &Envelope{Sequence: 0}
-	shf.input <- &Envelope{Sequence: 3}
-	shf.input <- &Envelope{Sequence: 1}
-	close(shf.input)
+	shf.sendEnvelopesInSequence(4, 2, 0, 3, 1)
 
 	shf.handler.Handle()
-
-	close(shf.output)
 
 	shf.So(shf.sequenceOrder(), should.Resemble, []int{0, 1, 2, 3, 4})
 	shf.So(shf.handler.buffer, should.BeEmpty)
 }
 
+func (shf *SequenceHandlerFixture) sendEnvelopesInSequence(sequences ...int) {
+	for _, sequence := range sequences {
+		shf.input <- &Envelope{Sequence: sequence}
+	}
+	close(shf.input)
+
+}
+
 func (shf *SequenceHandlerFixture) sequenceOrder() (order []int) {
+	close(shf.output)
+
 	for envelope := range shf.output {
 		order = append(order, envelope.Sequence)
 	}
