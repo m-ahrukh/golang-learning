@@ -27,15 +27,12 @@ func (acf *AuthenticationClientFixture) Setup() {
 }
 
 func (acf *AuthenticationClientFixture) TestProvidedInformationAddedBeforeRequestIsSent() {
-	request := httptest.NewRequest("GET", "/path", nil)
+	request := httptest.NewRequest("GET", "/path?existingKey=existingValue", nil)
 
 	acf.client.Do(request)
 
-	acf.So(acf.inner.request.Host, should.Equal, "different-company.com")
-	acf.So(acf.inner.request.URL.Scheme, should.Equal, "http")
-	acf.So(acf.inner.request.URL.Host, should.Equal, "different-company.com")
-	acf.So(acf.inner.request.URL.Query().Get("auth-id"), should.Equal, "authid")
-	acf.So(acf.inner.request.URL.Query().Get("auth-token"), should.Equal, "authtoken")
+	acf.assertRequestConnectionInformation()
+	acf.assertQueryStringIncludesAuthentication()
 }
 
 func (acf *AuthenticationClientFixture) TestResponseAndErrorFromInnerClientReturned() {
@@ -48,4 +45,20 @@ func (acf *AuthenticationClientFixture) TestResponseAndErrorFromInnerClientRetur
 
 	acf.So(response.StatusCode, should.Equal, http.StatusTeapot)
 	acf.So(err.Error(), should.Equal, "HTTP Error")
+}
+
+func (acf *AuthenticationClientFixture) assertQueryStringValue(key string, expectedString string) {
+	acf.So(acf.inner.request.URL.Query().Get(key), should.Equal, expectedString)
+}
+
+func (acf *AuthenticationClientFixture) assertRequestConnectionInformation() {
+	acf.So(acf.inner.request.Host, should.Equal, "different-company.com")
+	acf.So(acf.inner.request.URL.Scheme, should.Equal, "http")
+	acf.So(acf.inner.request.URL.Host, should.Equal, "different-company.com")
+}
+
+func (acf *AuthenticationClientFixture) assertQueryStringIncludesAuthentication() {
+	acf.assertQueryStringValue("auth-id", "authid")
+	acf.assertQueryStringValue("auth-token", "authtoken")
+	acf.assertQueryStringValue("existingKey", "existingValue")
 }
