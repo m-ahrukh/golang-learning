@@ -49,9 +49,9 @@ func (whf *WriterHandlerFixture) TestEnvelopeWritten() {
 			Status:        "A",
 			DeliveryLine1: "B",
 			City:          "C",
-			State:         "D",
-			ZIPCode:       "E",
-			LastLine:      "F",
+			LastLine:      "D",
+			State:         "E",
+			ZIPCode:       "F",
 		},
 	}
 	close(whf.input)
@@ -61,6 +61,38 @@ func (whf *WriterHandlerFixture) TestEnvelopeWritten() {
 	lines := strings.Split(outputFile, "\n")
 	if whf.So(lines, should.HaveLength, 2) {
 		whf.So(lines[1], should.Equal, "A,B,C,D,E,F")
+	}
+}
+
+func (whf *WriterHandlerFixture) TestAllEnvelopeWritten() {
+	whf.input <- &Envelope{
+		Output: AddressOutput{
+			Status:        "A1",
+			DeliveryLine1: "B1",
+			City:          "C1",
+			LastLine:      "D1",
+			State:         "E1",
+			ZIPCode:       "F1",
+		},
+	}
+	whf.input <- &Envelope{
+		Output: AddressOutput{
+			Status:        "A2",
+			DeliveryLine1: "B2",
+			City:          "C2",
+			LastLine:      "D2",
+			State:         "E2",
+			ZIPCode:       "F2",
+		},
+	}
+	close(whf.input)
+
+	whf.handler.Handle()
+	outputFile := strings.TrimSpace(whf.buffer.String())
+	lines := strings.Split(outputFile, "\n")
+	if whf.So(lines, should.HaveLength, 3) {
+		whf.So(lines[1], should.Equal, "A1,B1,C1,D1,E1,F1")
+		whf.So(lines[2], should.Equal, "A2,B2,C2,D2,E2,F2")
 	}
 }
 
