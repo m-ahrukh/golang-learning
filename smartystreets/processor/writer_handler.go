@@ -1,7 +1,6 @@
 package processor
 
 import (
-	"bytes"
 	"encoding/csv"
 	"io"
 )
@@ -22,23 +21,21 @@ func NewWriterHandler(input chan *Envelope, output io.WriteCloser) *WriterHandle
 
 func (wh *WriterHandler) Handle() {
 	wh.writer.Write([]string{"Status", "DeliveryLine1", "City", "State", "ZIPCode"})
+
+	envelope := <-wh.input
+
+	if envelope != nil {
+		output := envelope.Output
+		wh.writer.Write([]string{
+			output.Status,
+			output.DeliveryLine1,
+			output.City,
+			output.State,
+			output.ZIPCode,
+			output.LastLine,
+		})
+	}
+
 	wh.writer.Flush()
 	wh.closer.Close()
-}
-
-// /////////////////////////////////////////////////////////
-type WriterSpyBuffer struct {
-	*bytes.Buffer
-	closed int
-}
-
-func NewWriterSpyBuffer(value string) *WriterSpyBuffer {
-	return &WriterSpyBuffer{
-		Buffer: bytes.NewBufferString(value),
-	}
-}
-
-func (spyBuffer *WriterSpyBuffer) Close() error {
-	spyBuffer.closed++
-	return nil
 }
