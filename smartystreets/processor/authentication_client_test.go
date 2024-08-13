@@ -23,10 +23,10 @@ type AuthenticationClientFixture struct {
 
 func (acf *AuthenticationClientFixture) Setup() {
 	acf.inner = &FakeHTTPClient{}
-	acf.client = NewAuthenticationClient(acf.inner, "http", "different-company.com")
+	acf.client = NewAuthenticationClient(acf.inner, "http", "different-company.com", "authid", "authtoken")
 }
 
-func (acf *AuthenticationClientFixture) TestHostnameAndSchemaAddedBeforeRequestIsSent() {
+func (acf *AuthenticationClientFixture) TestProvidedInformationAddedBeforeRequestIsSent() {
 	request := httptest.NewRequest("GET", "/path", nil)
 
 	acf.client.Do(request)
@@ -34,6 +34,8 @@ func (acf *AuthenticationClientFixture) TestHostnameAndSchemaAddedBeforeRequestI
 	acf.So(acf.inner.request.Host, should.Equal, "different-company.com")
 	acf.So(acf.inner.request.URL.Scheme, should.Equal, "http")
 	acf.So(acf.inner.request.URL.Host, should.Equal, "different-company.com")
+	acf.So(acf.inner.request.URL.Query().Get("auth-id"), should.Equal, "authid")
+	acf.So(acf.inner.request.URL.Query().Get("auth-token"), should.Equal, "authtoken")
 }
 
 func (acf *AuthenticationClientFixture) TestResponseAndErrorFromInnerClientReturned() {
