@@ -172,13 +172,13 @@ func buildAnalysisJSON(match, vacant, active string) string {
 type FakeHTTPClient struct {
 	request      *http.Request
 	response     *http.Response
-	responseBody *SpyBuffer
+	responseBody *VerifierSpyBuffer
 	err          error
 }
 
 func (fakeHTTPClient *FakeHTTPClient) Configure(responseText string, statusCode int, err error) {
 	if err == nil {
-		fakeHTTPClient.responseBody = NewSpyBuffer(responseText)
+		fakeHTTPClient.responseBody = NewVerifierSpyBuffer(responseText)
 		fakeHTTPClient.response = &http.Response{
 			Body:       fakeHTTPClient.responseBody,
 			StatusCode: statusCode,
@@ -193,18 +193,18 @@ func (fakeHTTPClient *FakeHTTPClient) Do(request *http.Request) (*http.Response,
 }
 
 // ///////////////////////////////////////////////////////
-type SpyBuffer struct {
+type VerifierSpyBuffer struct {
 	*bytes.Buffer
 	closed int
 }
 
-func NewSpyBuffer(value string) *SpyBuffer {
-	return &SpyBuffer{
+func NewVerifierSpyBuffer(value string) *VerifierSpyBuffer {
+	return &VerifierSpyBuffer{
 		Buffer: bytes.NewBufferString(value),
 	}
 }
 
-func (spyBuffer *SpyBuffer) Close() error {
+func (spyBuffer *VerifierSpyBuffer) Close() error {
 	spyBuffer.closed++
 	spyBuffer.Buffer.Reset()
 	return nil
