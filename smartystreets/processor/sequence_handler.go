@@ -1,46 +1,41 @@
 package processor
 
 type SequenceHandler struct {
-	input  chan *Envelope
-	output chan *Envelope
+	input   chan *Envelope
+	output  chan *Envelope
+	counter int
+	buffer  map[int]*Envelope
 }
 
 func NewSequenceHandler(input, output chan *Envelope) *SequenceHandler {
 	return &SequenceHandler{
 		input:  input,
 		output: output,
+		buffer: make(map[int]*Envelope),
 	}
 }
 
 func (handler *SequenceHandler) Handle() {
-	counter := 0
-	// var buffer []*Envelope
-	var sequence = make(map[int]*Envelope)
 
 	for envelope := range handler.input {
-		sequence[envelope.Sequence] = envelope
-
-		for {
-			next, found := sequence[counter]
-			if !found {
-				break
-			}
-			handler.output <- next
-			counter++
-		}
-
-		// if envelope.Sequence == counter {
-		// 	handler.output <- envelope
-		// 	counter++
-		// 	if len(buffer) > 0 {
-		// 		handler.output <- buffer[0]
-		// 		counter++
-		// 	}
-		// } else {
-		// 	buffer = append(buffer, envelope)
-		// }
+		handler.processEnvelope(envelope)
 	}
-	// input := <-handler.input
-	// handler.output <- input
-	// handler.output <- <- handler.input
+	handler.buffer = make(map[int]*Envelope)
+}
+
+func (handler *SequenceHandler) processEnvelope(envelope *Envelope) {
+	handler.buffer[envelope.Sequence] = envelope
+	handler.sendBufferedEnvelopesInOrder()
+}
+
+func (handler *SequenceHandler) sendBufferedEnvelopesInOrder() {
+	for {
+		next, found := handler.buffer[handler.counter]
+		if !found {
+			break
+		}
+		handler.output <- next
+		delete(handler.buffer, handler.counter)
+		handler.counter++
+	}
 }
