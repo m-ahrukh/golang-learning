@@ -13,7 +13,21 @@ func NewSequenceHandler(input, output chan *Envelope) *SequenceHandler {
 }
 
 func (handler *SequenceHandler) Handle() {
-	input := <-handler.input
-	handler.output <- input
+	counter := 0
+	var buffer []*Envelope
+	for envelope := range handler.input {
+		if envelope.Sequence == counter {
+			handler.output <- envelope
+			counter++
+			if len(buffer) > 0 {
+				handler.output <- buffer[0]
+				counter++
+			}
+		} else {
+			buffer = append(buffer, envelope)
+		}
+	}
+	// input := <-handler.input
+	// handler.output <- input
 	// handler.output <- <- handler.input
 }
