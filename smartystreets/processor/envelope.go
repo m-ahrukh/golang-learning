@@ -1,8 +1,9 @@
 package processor
 
 type Envelope struct {
-	Input  AddressInput
-	Output AddressOutput
+	Input    AddressInput
+	Output   AddressOutput
+	Sequence int
 }
 
 type AddressInput struct {
