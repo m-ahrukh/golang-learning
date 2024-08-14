@@ -20,6 +20,8 @@ func NewReaderHandler(reader io.ReadCloser, output chan *Envelope) *ReaderHandle
 }
 
 func (rh *ReaderHandler) Handle() {
+	rh.skipHeader()
+
 	record, _ := rh.reader.Read()
 	envelope := &Envelope{
 		Input: AddressInput{
@@ -31,4 +33,8 @@ func (rh *ReaderHandler) Handle() {
 	}
 
 	rh.output <- envelope
+}
+
+func (rh *ReaderHandler) skipHeader() {
+	rh.reader.Read()
 }

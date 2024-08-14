@@ -20,16 +20,16 @@ func (rhf *ReaderHandlerFixture) Setup() {
 }
 
 func (rhf *ReaderHandlerFixture) TestCSVRecordSentInEnvelope() {
-	buffer := NewReadWriteSpyBuffer("Street1,City,State,ZIPCode")
+	buffer := NewReadWriteSpyBuffer("Street1,City,State,ZIPCode\n" + "A,B,C,D\n")
 	output := make(chan *Envelope, 10)
 	reader := NewReaderHandler(buffer, output)
 
 	reader.Handle()
 
 	rhf.So(<-output, should.Resemble, &Envelope{Input: AddressInput{
-		Street1: "Street1",
-		City:    "City",
-		State:   "State",
-		ZIPCode: "ZIPCode",
+		Street1: "A",
+		City:    "B",
+		State:   "C",
+		ZIPCode: "D",
 	}})
 }
