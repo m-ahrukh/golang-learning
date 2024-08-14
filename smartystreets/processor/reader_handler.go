@@ -2,6 +2,8 @@ package processor
 
 import (
 	"encoding/csv"
+	"errors"
+	"fmt"
 	"io"
 )
 
@@ -10,6 +12,7 @@ type ReaderHandler struct {
 	closer   io.Closer
 	output   chan *Envelope
 	sequence int
+	err      error
 }
 
 func NewReaderHandler(reader io.ReadCloser, output chan *Envelope) *ReaderHandler {
@@ -21,26 +24,36 @@ func NewReaderHandler(reader io.ReadCloser, output chan *Envelope) *ReaderHandle
 	}
 }
 
-func (rh *ReaderHandler) Handle() {
+func (rh *ReaderHandler) Handle() error {
+	defer rh.close()
+
 	rh.skipHeader()
 
 	for {
 		record, err := rh.reader.Read()
 		if err == io.EOF {
 			break
-		} else {
-			//TODO: warn user of malformed file???
+		} else if err != nil {
+			rh.err = err
+			fmt.Println(err)
+			return errors.New("malformed input")
 		}
-		rh.output <- &Envelope{
-			Sequence: rh.sequence,
-			Input:    createinput(record),
-		}
-		rh.sequence++
+		rh.sendEnvelope(record)
 	}
 
-	rh.output <- endOfFile
-	close(rh.output)
-	rh.closer.Close()
+	return nil
+}
+
+func (rh *ReaderHandler) skipHeader() {
+	rh.reader.Read()
+}
+
+func (rh *ReaderHandler) sendEnvelope(record []string) {
+	rh.output <- &Envelope{
+		Sequence: rh.sequence,
+		Input:    createinput(record),
+	}
+	rh.sequence++
 }
 
 func createinput(record []string) AddressInput {
@@ -52,6 +65,10 @@ func createinput(record []string) AddressInput {
 	}
 }
 
-func (rh *ReaderHandler) skipHeader() {
-	rh.reader.Read()
+func (rh *ReaderHandler) close() {
+	if rh.err == nil {
+		rh.output <- endOfFile
+	}
+	close(rh.output)
+	rh.closer.Close()
 }

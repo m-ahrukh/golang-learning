@@ -29,30 +29,13 @@ func (rhf *ReaderHandlerFixture) Setup() {
 	rhf.writeLine(header)
 }
 
-func (rhf *ReaderHandlerFixture) TestCSVRecordSentInEnvelope() {
-	rhf.writeLine("A1,B1,C1,D1")
-
-	rhf.reader.Handle()
-
-	rhf.So(<-rhf.output, should.Resemble, &Envelope{
-		Sequence: initialSequenceValue,
-		Input: AddressInput{
-			Street1: "A1",
-			City:    "B1",
-			State:   "C1",
-			ZIPCode: "D1",
-		},
-	})
-}
-
-func (rhf *ReaderHandlerFixture) TestAllCSVRecordsWrittenToOutput() {
+func (rhf *ReaderHandlerFixture) TestAllCSVRecordsSentToOutput() {
 	rhf.writeLine("A1,B1,C1,D1")
 	rhf.writeLine("A2,B2,C2,D2")
 
 	rhf.reader.Handle()
 
 	rhf.assertRecordSent()
-
 	rhf.assertCleanup()
 }
 
@@ -82,4 +65,13 @@ func buildEnvelope(index int) *Envelope {
 			ZIPCode: "D" + suffix,
 		},
 	}
+}
+
+func (rhf *ReaderHandlerFixture) TestMalformedInputReturnsError() {
+	malformedRecord := "A1" //too short
+	rhf.writeLine(malformedRecord)
+
+	err := rhf.reader.Handle()
+
+	rhf.So(err, should.NotBeNil)
 }
