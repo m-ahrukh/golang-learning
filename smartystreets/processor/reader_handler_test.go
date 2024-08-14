@@ -1,6 +1,7 @@
 package processor
 
 import (
+	"strconv"
 	"testing"
 
 	"github.com/smarty/assertions/should"
@@ -29,24 +30,7 @@ func (rhf *ReaderHandlerFixture) Setup() {
 }
 
 func (rhf *ReaderHandlerFixture) TestCSVRecordSentInEnvelope() {
-	rhf.writeLine("A,B,C,D")
-
-	rhf.reader.Handle()
-
-	rhf.So(<-rhf.output, should.Resemble, &Envelope{
-		Sequence: initialSequenceValue,
-		Input: AddressInput{
-			Street1: "A",
-			City:    "B",
-			State:   "C",
-			ZIPCode: "D",
-		},
-	})
-}
-
-func (rhf *ReaderHandlerFixture) TestAllCSVRecordsWrittenToOutput() {
 	rhf.writeLine("A1,B1,C1,D1")
-	rhf.writeLine("A2,B2,C2,D2")
 
 	rhf.reader.Handle()
 
@@ -59,22 +43,43 @@ func (rhf *ReaderHandlerFixture) TestAllCSVRecordsWrittenToOutput() {
 			ZIPCode: "D1",
 		},
 	})
+}
 
-	rhf.So(<-rhf.output, should.Resemble, &Envelope{
-		Sequence: initialSequenceValue + 1,
-		Input: AddressInput{
-			Street1: "A2",
-			City:    "B2",
-			State:   "C2",
-			ZIPCode: "D2",
-		},
-	})
+func (rhf *ReaderHandlerFixture) TestAllCSVRecordsWrittenToOutput() {
+	rhf.writeLine("A1,B1,C1,D1")
+	rhf.writeLine("A2,B2,C2,D2")
 
-	rhf.So(<-rhf.output, should.Resemble, &Envelope{Sequence: eofSequenceValue})
+	rhf.reader.Handle()
+
+	rhf.assertRecordSent()
+
+	rhf.assertCleanup()
+}
+
+func (rhf *ReaderHandlerFixture) assertRecordSent() {
+	rhf.So(<-rhf.output, should.Resemble, buildEnvelope(initialSequenceValue))
+	rhf.So(<-rhf.output, should.Resemble, buildEnvelope(initialSequenceValue+1))
+}
+
+func (rhf *ReaderHandlerFixture) assertCleanup() {
+	rhf.So(<-rhf.output, should.Equal, endOfFile)
 	rhf.So(<-rhf.output, should.BeNil)
 	rhf.So(rhf.buffer.closed, should.Equal, 1)
 }
 
 func (rhf *ReaderHandlerFixture) writeLine(line string) {
 	rhf.buffer.WriteString(line + "\n")
+}
+
+func buildEnvelope(index int) *Envelope {
+	suffix := strconv.Itoa(index + 1)
+	return &Envelope{
+		Sequence: index,
+		Input: AddressInput{
+			Street1: "A" + suffix,
+			City:    "B" + suffix,
+			State:   "C" + suffix,
+			ZIPCode: "D" + suffix,
+		},
+	}
 }

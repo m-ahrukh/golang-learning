@@ -38,7 +38,7 @@ func (rh *ReaderHandler) Handle() {
 		rh.sequence++
 	}
 
-	rh.output <- &Envelope{Sequence: eofSequenceValue}
+	rh.output <- endOfFile
 	close(rh.output)
 	rh.closer.Close()
 }

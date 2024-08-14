@@ -5,6 +5,8 @@ const (
 	eofSequenceValue     = -1
 )
 
+var endOfFile = &Envelope{Sequence: eofSequenceValue}
+
 type Envelope struct {
 	Input    AddressInput
 	Output   AddressOutput
