@@ -1,5 +1,10 @@
 package processor
 
+const (
+	initialSequenceValue = 0
+	eofSequenceValue     = -1
+)
+
 type Envelope struct {
 	Input    AddressInput
 	Output   AddressOutput

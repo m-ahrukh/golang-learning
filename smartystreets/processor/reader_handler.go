@@ -6,16 +6,18 @@ import (
 )
 
 type ReaderHandler struct {
-	reader *csv.Reader
-	closer io.Closer
-	output chan *Envelope
+	reader   *csv.Reader
+	closer   io.Closer
+	output   chan *Envelope
+	sequence int
 }
 
 func NewReaderHandler(reader io.ReadCloser, output chan *Envelope) *ReaderHandler {
 	return &ReaderHandler{
-		reader: csv.NewReader(reader),
-		closer: reader,
-		output: output,
+		reader:   csv.NewReader(reader),
+		closer:   reader,
+		output:   output,
+		sequence: initialSequenceValue,
 	}
 }
 
@@ -30,9 +32,15 @@ func (rh *ReaderHandler) Handle() {
 			//TODO: warn user of malformed file???
 		}
 		rh.output <- &Envelope{
-			Input: createinput(record),
+			Sequence: rh.sequence,
+			Input:    createinput(record),
 		}
+		rh.sequence++
 	}
+
+	rh.output <- &Envelope{Sequence: eofSequenceValue}
+	close(rh.output)
+	rh.closer.Close()
 }
 
 func createinput(record []string) AddressInput {

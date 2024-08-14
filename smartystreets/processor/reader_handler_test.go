@@ -33,12 +33,15 @@ func (rhf *ReaderHandlerFixture) TestCSVRecordSentInEnvelope() {
 
 	rhf.reader.Handle()
 
-	rhf.So(<-rhf.output, should.Resemble, &Envelope{Input: AddressInput{
-		Street1: "A",
-		City:    "B",
-		State:   "C",
-		ZIPCode: "D",
-	}})
+	rhf.So(<-rhf.output, should.Resemble, &Envelope{
+		Sequence: initialSequenceValue,
+		Input: AddressInput{
+			Street1: "A",
+			City:    "B",
+			State:   "C",
+			ZIPCode: "D",
+		},
+	})
 }
 
 func (rhf *ReaderHandlerFixture) TestAllCSVRecordsWrittenToOutput() {
@@ -47,18 +50,29 @@ func (rhf *ReaderHandlerFixture) TestAllCSVRecordsWrittenToOutput() {
 
 	rhf.reader.Handle()
 
-	rhf.So(<-rhf.output, should.Resemble, &Envelope{Input: AddressInput{
-		Street1: "A1",
-		City:    "B1",
-		State:   "C1",
-		ZIPCode: "D1",
-	}})
-	rhf.So(<-rhf.output, should.Resemble, &Envelope{Input: AddressInput{
-		Street1: "A2",
-		City:    "B2",
-		State:   "C2",
-		ZIPCode: "D2",
-	}})
+	rhf.So(<-rhf.output, should.Resemble, &Envelope{
+		Sequence: initialSequenceValue,
+		Input: AddressInput{
+			Street1: "A1",
+			City:    "B1",
+			State:   "C1",
+			ZIPCode: "D1",
+		},
+	})
+
+	rhf.So(<-rhf.output, should.Resemble, &Envelope{
+		Sequence: initialSequenceValue + 1,
+		Input: AddressInput{
+			Street1: "A2",
+			City:    "B2",
+			State:   "C2",
+			ZIPCode: "D2",
+		},
+	})
+
+	rhf.So(<-rhf.output, should.Resemble, &Envelope{Sequence: eofSequenceValue})
+	rhf.So(<-rhf.output, should.BeNil)
+	rhf.So(rhf.buffer.closed, should.Equal, 1)
 }
 
 func (rhf *ReaderHandlerFixture) writeLine(line string) {
