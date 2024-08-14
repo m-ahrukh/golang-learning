@@ -12,26 +12,23 @@ type WriterHandler struct {
 }
 
 func NewWriterHandler(input chan *Envelope, output io.WriteCloser) *WriterHandler {
-	return &WriterHandler{
+	this := &WriterHandler{
 		input:  input,
 		closer: output,
 		writer: csv.NewWriter(output),
 	}
+
+	this.writeValues("Status", "DeliveryLine1", "City", "LastLine", "State", "ZIPCode")
+
+	return this
 }
 
 func (wh *WriterHandler) Handle() {
-	wh.writer.Write([]string{"Status", "DeliveryLine1", "City", "State", "ZIPCode"})
 
 	for envelope := range wh.input {
 		output := envelope.Output
 		wh.writeAddressOutput(output)
 	}
-
-	// envelope := <-wh.input
-	// if envelope != nil {
-	// 	output := envelope.Output
-	// 	wh.writeAddressOutput(output)
-	// }
 
 	wh.writer.Flush()
 	wh.closer.Close()

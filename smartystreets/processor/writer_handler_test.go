@@ -3,6 +3,7 @@ package processor
 import (
 	"bytes"
 	"encoding/csv"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -33,7 +34,7 @@ func (whf *WriterHandlerFixture) TestHeaderWritten() {
 	close(whf.input)
 	whf.handler.Handle()
 
-	whf.So(whf.buffer.String(), should.Equal, "Status,DeliveryLine1,City,State,ZIPCode\n")
+	whf.So(whf.buffer.String(), should.Equal, "Status,DeliveryLine1,City,LastLine,State,ZIPCode\n")
 }
 
 func (whf *WriterHandlerFixture) TestOuputClosed() {
@@ -44,56 +45,79 @@ func (whf *WriterHandlerFixture) TestOuputClosed() {
 }
 
 func (whf *WriterHandlerFixture) TestEnvelopeWritten() {
-	whf.input <- &Envelope{
-		Output: AddressOutput{
-			Status:        "A",
-			DeliveryLine1: "B",
-			City:          "C",
-			LastLine:      "D",
-			State:         "E",
-			ZIPCode:       "F",
-		},
-	}
-	close(whf.input)
+	whf.sendEnvelopes(1)
 
 	whf.handler.Handle()
-	outputFile := strings.TrimSpace(whf.buffer.String())
-	lines := strings.Split(outputFile, "\n")
-	if whf.So(lines, should.HaveLength, 2) {
-		whf.So(lines[1], should.Equal, "A,B,C,D,E,F")
+
+	if lines := whf.outputLines(); whf.So(lines, should.HaveLength, 2) {
+		whf.So(lines[1], should.Equal, "A1,B1,C1,D1,E1,F1")
 	}
 }
 
-func (whf *WriterHandlerFixture) TestAllEnvelopeWritten() {
+var recordMatchingHeader = AddressOutput{
+	Status:        "Status",
+	DeliveryLine1: "DeliveryLine1",
+	LastLine:      "LastLine",
+	City:          "City",
+	State:         "State",
+	ZIPCode:       "ZIPCode",
+}
+
+func (whf *WriterHandlerFixture) TestHeaderMatchesRecords() {
 	whf.input <- &Envelope{
-		Output: AddressOutput{
-			Status:        "A1",
-			DeliveryLine1: "B1",
-			City:          "C1",
-			LastLine:      "D1",
-			State:         "E1",
-			ZIPCode:       "F1",
-		},
-	}
-	whf.input <- &Envelope{
-		Output: AddressOutput{
-			Status:        "A2",
-			DeliveryLine1: "B2",
-			City:          "C2",
-			LastLine:      "D2",
-			State:         "E2",
-			ZIPCode:       "F2",
-		},
+		Output: recordMatchingHeader,
 	}
 	close(whf.input)
 
 	whf.handler.Handle()
-	outputFile := strings.TrimSpace(whf.buffer.String())
-	lines := strings.Split(outputFile, "\n")
-	if whf.So(lines, should.HaveLength, 3) {
+
+	whf.assertHeaderMatchesRecords()
+}
+
+func (whf *WriterHandlerFixture) assertHeaderMatchesRecords() {
+	lines := whf.outputLines()
+	header := lines[0]
+	record := lines[1]
+
+	whf.So(header, should.Equal, "Status,DeliveryLine1,City,LastLine,State,ZIPCode")
+	whf.So(record, should.Equal, header)
+}
+
+func (whf *WriterHandlerFixture) TestAllEnvelopeWritten() {
+	whf.sendEnvelopes(2)
+
+	whf.handler.Handle()
+
+	if lines := whf.outputLines(); whf.So(lines, should.HaveLength, 3) {
 		whf.So(lines[1], should.Equal, "A1,B1,C1,D1,E1,F1")
 		whf.So(lines[2], should.Equal, "A2,B2,C2,D2,E2,F2")
 	}
+}
+
+func (whf *WriterHandlerFixture) sendEnvelopes(count int) {
+	for x := 1; x <= count; x++ {
+		index := strconv.Itoa(x)
+		whf.input <- &Envelope{
+			Output: createOutput(index),
+		}
+	}
+	close(whf.input)
+}
+
+func createOutput(index string) AddressOutput {
+	return AddressOutput{
+		Status:        "A" + index,
+		DeliveryLine1: "B" + index,
+		City:          "C" + index,
+		LastLine:      "D" + index,
+		State:         "E" + index,
+		ZIPCode:       "F" + index,
+	}
+}
+
+func (whf *WriterHandlerFixture) outputLines() []string {
+	outputFile := strings.TrimSpace(whf.buffer.String())
+	return strings.Split(outputFile, "\n")
 }
 
 // /////////////////////////////////////////////////////////
