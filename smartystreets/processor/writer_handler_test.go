@@ -20,12 +20,12 @@ type WriterHandlerFixture struct {
 
 	handler *WriterHandler
 	input   chan *Envelope
-	buffer  *WriterSpyBuffer
+	buffer  *ReadWriteSpyBuffer
 	writer  *csv.Writer
 }
 
 func (whf *WriterHandlerFixture) Setup() {
-	whf.buffer = NewWriterSpyBuffer("")
+	whf.buffer = NewReadWriteSpyBuffer("")
 	whf.input = make(chan *Envelope, 10)
 	whf.handler = NewWriterHandler(whf.input, whf.buffer)
 }
@@ -121,18 +121,18 @@ func (whf *WriterHandlerFixture) outputLines() []string {
 }
 
 // /////////////////////////////////////////////////////////
-type WriterSpyBuffer struct {
+type ReadWriteSpyBuffer struct {
 	*bytes.Buffer
 	closed int
 }
 
-func NewWriterSpyBuffer(value string) *WriterSpyBuffer {
-	return &WriterSpyBuffer{
+func NewReadWriteSpyBuffer(value string) *ReadWriteSpyBuffer {
+	return &ReadWriteSpyBuffer{
 		Buffer: bytes.NewBufferString(value),
 	}
 }
 
-func (spyBuffer *WriterSpyBuffer) Close() error {
+func (spyBuffer *ReadWriteSpyBuffer) Close() error {
 	spyBuffer.closed++
 	return nil
 }
