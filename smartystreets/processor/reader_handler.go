@@ -24,6 +24,8 @@ func NewReaderHandler(reader io.ReadCloser, output chan *Envelope) *ReaderHandle
 	}
 }
 
+// var endOfFile = &Envelope{Sequence: eofSequenceValue}
+
 func (rh *ReaderHandler) Handle() error {
 	defer rh.close()
 
@@ -67,7 +69,7 @@ func createinput(record []string) AddressInput {
 
 func (rh *ReaderHandler) close() {
 	if rh.err == nil {
-		rh.output <- endOfFile
+		rh.output <- &Envelope{Sequence: rh.sequence, EOF: true}
 	}
 	close(rh.output)
 	rh.closer.Close()

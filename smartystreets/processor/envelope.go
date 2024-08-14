@@ -2,12 +2,10 @@ package processor
 
 const (
 	initialSequenceValue = 0
-	eofSequenceValue     = -1
 )
 
-var endOfFile = &Envelope{Sequence: eofSequenceValue}
-
 type Envelope struct {
+	EOF      bool
 	Input    AddressInput
 	Output   AddressOutput
 	Sequence int
