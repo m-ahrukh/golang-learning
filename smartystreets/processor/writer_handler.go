@@ -26,8 +26,10 @@ func NewWriterHandler(input chan *Envelope, output io.WriteCloser) *WriterHandle
 func (wh *WriterHandler) Handle() {
 
 	for envelope := range wh.input {
+		// if !envelope.EOF {
 		output := envelope.Output
 		wh.writeAddressOutput(output)
+		// }
 	}
 
 	wh.writer.Flush()

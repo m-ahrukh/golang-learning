@@ -101,6 +101,7 @@ func (whf *WriterHandlerFixture) sendEnvelopes(count int) {
 			Output: createOutput(index),
 		}
 	}
+
 	close(whf.input)
 }
 

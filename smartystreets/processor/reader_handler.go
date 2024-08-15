@@ -24,8 +24,6 @@ func NewReaderHandler(reader io.ReadCloser, output chan *Envelope) *ReaderHandle
 	}
 }
 
-// var endOfFile = &Envelope{Sequence: eofSequenceValue}
-
 func (rh *ReaderHandler) Handle() error {
 	defer rh.close()
 

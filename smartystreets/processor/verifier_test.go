@@ -108,18 +108,6 @@ func (verifierFixture *VerifierFixture) TestHTTPResponseBodyClosed() {
 
 }
 
-// const deliverableJSONOutput = `[
-// 	{
-// 		"delivery_line_1": "1 Santa Claus Ln",
-// 		"last_line": "North Pole AK 99705-9901",
-// 		"analysis": {
-// 			"dpv_match_code": "Y",
-// 			"dpv_vacant": "N",
-// 			"active": "Y"
-// 		}
-// 	}
-// ]`
-
 func (verifierFixture *VerifierFixture) TestAddressStatus() {
 	var (
 		deliverableJSON      = buildAnalysisJSON("Y", "N", "Y")
@@ -137,16 +125,6 @@ func (verifierFixture *VerifierFixture) TestAddressStatus() {
 	verifierFixture.verifyAndAssertStatus(inactiveJSON, "Inactive")
 	verifierFixture.verifyAndAssertStatus(invalidJSON, "Invalid")
 }
-
-// const vacantJSONOutput = `[
-// 	{
-// 		"analysis": {
-// 			"dpv_match_code": "Y",
-// 			"dpv_vacant": "Y",
-// 			"active": "Y"
-// 		}
-// 	}
-// ]`
 
 func (verifierFixture *VerifierFixture) verifyAndAssertStatus(jsonResponse, expectedStatus string) {
 	verifierFixture.client.Configure(jsonResponse, http.StatusOK, nil)

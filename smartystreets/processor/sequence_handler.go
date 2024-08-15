@@ -17,11 +17,11 @@ func NewSequenceHandler(input, output chan *Envelope) *SequenceHandler {
 }
 
 func (handler *SequenceHandler) Handle() {
-
 	for envelope := range handler.input {
 		handler.processEnvelope(envelope)
 	}
-	handler.buffer = make(map[int]*Envelope)
+	// close(handler.input)
+	close(handler.output)
 }
 
 func (handler *SequenceHandler) processEnvelope(envelope *Envelope) {
@@ -35,8 +35,16 @@ func (handler *SequenceHandler) sendBufferedEnvelopesInOrder() {
 		if !found {
 			break
 		}
-		handler.output <- next
-		delete(handler.buffer, handler.counter)
-		handler.counter++
+		handler.sendNextEnvelope(next)
 	}
+}
+
+func (handler *SequenceHandler) sendNextEnvelope(envelope *Envelope) {
+	if envelope.EOF {
+		close(handler.input)
+	} else {
+		handler.output <- envelope
+	}
+	delete(handler.buffer, handler.counter)
+	handler.counter++
 }
