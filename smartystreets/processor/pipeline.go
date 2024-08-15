@@ -21,21 +21,21 @@ func Configure(reader io.ReadCloser, writer io.WriteCloser, client HTTPClient, w
 	}
 }
 
-func (this *Pipeline) Process() (err error) {
+func (pipeline *Pipeline) Process() (err error) {
 	verifyInput := make(chan *Envelope, 1024)
 	sequenceInput := make(chan *Envelope, 1024)
 	writerInput := make(chan *Envelope, 1024)
 
-	verifier := NewSmartyVerifier(this.client)
+	verifier := NewSmartyVerifier(pipeline.client)
 
-	for i := 0; i < this.workers; i++ {
+	for i := 0; i < pipeline.workers; i++ {
 		go NewVerifyHandler(verifyInput, sequenceInput, verifier).Handle()
 	}
 	go func() {
-		err = NewReaderHandler(this.reader, verifyInput).Handle()
+		err = NewReaderHandler(pipeline.reader, verifyInput).Handle()
 	}()
 	go NewSequenceHandler(sequenceInput, writerInput).Handle()
 
-	NewWriterHandler(writerInput, this.writer).Handle()
+	NewWriterHandler(writerInput, pipeline.writer).Handle()
 	return err
 }

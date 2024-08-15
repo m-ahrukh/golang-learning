@@ -49,10 +49,11 @@ func (rh *ReaderHandler) skipHeader() {
 }
 
 func (rh *ReaderHandler) sendEnvelope(record []string) {
-	rh.output <- &Envelope{
+	envelope := &Envelope{
 		Sequence: rh.sequence,
 		Input:    createinput(record),
 	}
+	rh.output <- envelope
 	rh.sequence++
 }
 

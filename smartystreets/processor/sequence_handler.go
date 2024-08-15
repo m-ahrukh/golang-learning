@@ -20,7 +20,7 @@ func (handler *SequenceHandler) Handle() {
 	for envelope := range handler.input {
 		handler.processEnvelope(envelope)
 	}
-	// close(handler.input)
+
 	close(handler.output)
 }
 

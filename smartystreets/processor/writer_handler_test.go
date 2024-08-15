@@ -34,7 +34,7 @@ func (whf *WriterHandlerFixture) TestHeaderWritten() {
 	close(whf.input)
 	whf.handler.Handle()
 
-	whf.So(whf.buffer.String(), should.Equal, "Status,DeliveryLine1,City,LastLine,State,ZIPCode\n")
+	whf.So(whf.buffer.String(), should.Equal, "Status,DeliveryLine1,LastLine,City,State,ZIPCode\n")
 }
 
 func (whf *WriterHandlerFixture) TestOuputClosed() {
@@ -79,7 +79,7 @@ func (whf *WriterHandlerFixture) assertHeaderMatchesRecords() {
 	header := lines[0]
 	record := lines[1]
 
-	whf.So(header, should.Equal, "Status,DeliveryLine1,City,LastLine,State,ZIPCode")
+	whf.So(header, should.Equal, "Status,DeliveryLine1,LastLine,City,State,ZIPCode")
 	whf.So(record, should.Equal, header)
 }
 
@@ -102,6 +102,7 @@ func (whf *WriterHandlerFixture) sendEnvelopes(count int) {
 		}
 	}
 
+	// whf.input <- &Envelope{Sequence: count + 1, EOF: true}
 	close(whf.input)
 }
 
@@ -109,8 +110,8 @@ func createOutput(index string) AddressOutput {
 	return AddressOutput{
 		Status:        "A" + index,
 		DeliveryLine1: "B" + index,
-		City:          "C" + index,
-		LastLine:      "D" + index,
+		LastLine:      "C" + index,
+		City:          "D" + index,
 		State:         "E" + index,
 		ZIPCode:       "F" + index,
 	}

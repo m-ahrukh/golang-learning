@@ -18,7 +18,7 @@ func NewWriterHandler(input chan *Envelope, output io.WriteCloser) *WriterHandle
 		writer: csv.NewWriter(output),
 	}
 
-	this.writeValues("Status", "DeliveryLine1", "City", "LastLine", "State", "ZIPCode")
+	this.writeValues("Status", "DeliveryLine1", "LastLine", "City", "State", "ZIPCode")
 
 	return this
 }
@@ -40,8 +40,8 @@ func (wh *WriterHandler) writeAddressOutput(output AddressOutput) {
 	wh.writeValues(
 		output.Status,
 		output.DeliveryLine1,
-		output.City,
 		output.LastLine,
+		output.City,
 		output.State,
 		output.ZIPCode,
 	)
