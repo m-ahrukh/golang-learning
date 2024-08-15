@@ -1,12 +1,9 @@
 package processor
 
 import (
-	"bytes"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
-	"strings"
 	"testing"
 
 	"github.com/smarty/assertions/should"
@@ -20,27 +17,23 @@ func TestPipelineFixture(t *testing.T) {
 type PipelineFixture struct {
 	*gunit.Fixture
 
-	reader   *strings.Reader
+	reader   *ReadWriteSpyBuffer
 	writer   *ReadWriteSpyBuffer
 	client   *IntegrationHTTPClient
 	pipeline *Pipeline
 }
 
 func (pf *PipelineFixture) Setup() {
-	log.SetFlags(log.Llongfile | log.Lmicroseconds)
+	pf.reader = NewReadWriteSpyBuffer("")
+	pf.writer = NewReadWriteSpyBuffer("")
+	pf.client = &IntegrationHTTPClient{}
+	pf.pipeline = NewPipeline(io.NopCloser(pf.reader), pf.writer, pf.client, 2)
 }
 
 func (pf *PipelineFixture) LongTestPipeline() {
-
-	buffer := new(bytes.Buffer)
-	fmt.Fprintln(buffer, ("Street1,City,State,ZIPCode"))
-	fmt.Fprintln(buffer, ("A,B,C,D"))
-	fmt.Fprintln(buffer, ("A,B,C,D"))
-
-	pf.reader = strings.NewReader(buffer.String())
-	pf.writer = NewReadWriteSpyBuffer("")
-	pf.client = &IntegrationHTTPClient{}
-	pf.pipeline = Configure(io.NopCloser(pf.reader), pf.writer, pf.client, 2)
+	fmt.Fprintln(pf.reader, ("Street1,City,State,ZIPCode"))
+	fmt.Fprintln(pf.reader, ("A,B,C,D"))
+	fmt.Fprintln(pf.reader, ("A,B,C,D"))
 
 	err := pf.pipeline.Process()
 
